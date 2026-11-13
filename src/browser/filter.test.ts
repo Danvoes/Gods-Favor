@@ -20,7 +20,7 @@ describe("card browser filters", () => {
   });
 
   it("combines all three filters", () => {
-    const result = applyFilters(items, { deck: "Calamity", domain: "Nature", tier: "Severe" });
+    const result = applyFilters(items, { deck: "Calamity", domain: "Nature", tier: "Cataclysmic" });
     expect(result.map((i) => i.id)).toEqual(["NAT-C-01", "NAT-C-02"]);
   });
 

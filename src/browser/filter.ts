@@ -12,7 +12,7 @@ export const DECK_OPTIONS = ["Calamity", "Favor", "Free Will", "Prophet", "Hero"
 export const DOMAIN_OPTIONS = [
   "Nature", "Harvest", "Production/Technology", "Health/Fertility", "Neutral",
 ] as const;
-export const TIER_OPTIONS = ["Severe", "Medium", "Moderate", "Light", "Loss", "Roll", "Gain"] as const;
+export const TIER_OPTIONS = ["Cataclysmic", "Major", "Minor", "Slight", "Loss", "Roll", "Gain"] as const;
 
 export type DeckOption = (typeof DECK_OPTIONS)[number];
 export type DomainOption = (typeof DOMAIN_OPTIONS)[number];

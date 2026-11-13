@@ -1,104 +1,104 @@
 id,name,deck,domain,tier,cost,effect,flavor
-NAT-C-01,Wildfire,Calamity,Nature,Severe,6,"Target city loses 5 Flock, and one neighbor loses 3.","A dry summer, a single spark, and the hills burn for a week."
-NAT-C-02,Great Flood,Calamity,Nature,Severe,6,Every city in the target region loses 3 Flock.,"The river forgets its banks, and three cities wake up underwater."
-NAT-C-03,Tornado,Calamity,Nature,Medium,4,"Target loses 3 Flock, and one neighbor loses 2.",It touches down in the square and doesn't lift until the next town over.
-NAT-C-04,Earthquake,Calamity,Nature,Medium,4,"Target loses 3 Flock, and one neighbor loses 1. Neither city can receive Flock next turn.","The ground splits, and the roads between cities go with it."
-NAT-C-05,Avalanche,Calamity,Nature,Medium,4,"Target loses 2 Flock, and every other city in the region loses 1.",The mountain lets go all at once.
-NAT-C-06,Hailstorm,Calamity,Nature,Moderate,3,"Target loses 2 Flock, and one neighbor loses 1.","Ice the size of fists, and no roof that can hold it."
-NAT-C-07,Wild Beasts,Calamity,Nature,Moderate,3,"Target loses 2 Flock, and its owner can't move Flock out of that city next turn.","Wolves on the roads at night, and no one travels."
-NAT-C-08,Thick Fog,Calamity,Nature,Light,1,Target and one neighbor each lose 1 Flock.,For three days no one can see the temple steps.
-NAT-C-09,Strong Winds,Calamity,Nature,Light,2,Move 1 of the target player's Flock to a neighboring city they don't control.,Some who flee the storm never find their way home.
-NAT-F-01,Great Migration,Favor,Nature,Severe,6,"Target gains 5 Flock, and one neighbor gains 3.","Herds and families move together, following the god who called them."
-NAT-F-02,Spring Awakening,Favor,Nature,Severe,6,Every city in the target region where you have Flock gains 2.,"The thaw comes early, and the whole valley turns green overnight."
-NAT-F-03,Fertile Floodplain,Favor,Nature,Medium,4,"Target gains 3 Flock, and one neighbor gains 2.",The river rises gently and leaves rich soil where it falls back.
-NAT-F-04,Sacred Grove,Favor,Nature,Medium,4,"Target gains 2 Flock, and every other city in the region where you have Flock gains 1.",Pilgrims come to the old trees and stay for the shade.
-NAT-F-05,Shelter of the Wild,Favor,Nature,Medium,4,"Counter: cancel a Calamity just played on one of your cities, then that city and one neighbor each gain 1.",The forest closes around them like a cloak.
-NAT-F-06,Gentle Rain,Favor,Nature,Moderate,3,"Target gains 2 Flock, and one neighbor gains 1.","Not a storm, just enough."
-NAT-F-07,Animal Guides,Favor,Nature,Moderate,3,"Move up to 2 of your Flock into a neighboring city, then add 1 more there.","Follow the deer, the elders say, and you'll find the way."
-NAT-F-08,Morning Dew,Favor,Nature,Light,1,Target and one neighbor each gain 1 Flock.,Every leaf shines at dawn.
-NAT-F-09,Tailwind,Favor,Nature,Light,2,Take 1 of an opponent's Flock from a neighboring city and make it yours.,A kind wind carries the curious to new temples.
-HAR-C-01,Famine,Calamity,Harvest,Severe,6,Target player gains no Flock income for their next 2 Economy Phases.,"The granaries are empty, and the faithful start asking whose fault it is."
-HAR-C-02,Blight,Calamity,Harvest,Severe,6,"Target city loses 2 Flock now, then 1 more at the start of each of its owner's next 3 turns.","It starts as a few black leaves, and then it's every field."
-HAR-C-03,Locust Swarm,Calamity,Harvest,Medium,4,Target player loses 3 Flock from reserve. Anything they can't pay comes out of their cities.,"The sky goes dark at noon, and the sound never stops."
-HAR-C-04,Failed Harvest,Calamity,Harvest,Medium,4,Target city produces no income for 2 turns.,"The crop came in thin, and no one has anything to spare."
-HAR-C-05,Drought,Calamity,Harvest,Medium,4,Target city loses 1 Flock at the start of each of its owner's next 3 turns.,Each morning the well is a little deeper.
-HAR-C-06,Spoiled Stores,Calamity,Harvest,Moderate,3,Target player loses 2 Flock from reserve.,Damp got into the cellars over winter.
-HAR-C-07,Late Frost,Calamity,Harvest,Moderate,3,Target city loses 1 Flock now and 1 next turn.,One cold night in spring undoes a month of work.
-HAR-C-08,Weevils,Calamity,Harvest,Light,1,Target player loses 1 Flock from reserve.,"Small, patient and always hungry."
-HAR-C-09,Rot in the Granary,Calamity,Harvest,Light,2,"Target player's next income is halved, rounded down.",Half the grain is good. No one can say which half.
-HAR-F-01,Bountiful Harvest,Favor,Harvest,Severe,6,Plant a seed. It yields 8 Flock at your next Economy Phase.,"The whole city turns out for the reaping, and still they can't carry it all."
-HAR-F-02,Season of Plenty,Favor,Harvest,Severe,6,"For your next 3 Economy Phases, every city you control gives +1 extra income.","Three good years in a row, and the faithful remember who to thank."
-HAR-F-03,Planting Festival,Favor,Harvest,Medium,4,Plant a seed. It yields 5 Flock at your next Economy Phase.,"Songs in the fields, and every hand in the soil."
-HAR-F-04,Full Granary,Favor,Harvest,Medium,4,Gain 3 Flock in reserve now and 1 more next turn.,"Stores enough to last the winter, and then some."
-HAR-F-05,Rationing,Favor,Harvest,Medium,4,"Counter: cancel one ongoing effect on you or your cities (e.g. Famine, Blight or Drought), then gain 2 in reserve.","Less bread for everyone, but bread for everyone."
-HAR-F-06,Seedbed,Favor,Harvest,Moderate,3,Plant a seed. It yields 4 Flock at your next Economy Phase.,"Small rows, carefully tended."
-HAR-F-07,Stockpile,Favor,Harvest,Moderate,3,Gain 2 Flock in reserve now and 1 more at your next Economy Phase.,"Put a little aside, the elders say, and it comes back to you."
-HAR-F-08,Gleaners,Favor,Harvest,Light,1,Gain 1 Flock in reserve.,The poor walk the fields after the harvest and find enough.
-HAR-F-09,Early Sprouts,Favor,Harvest,Light,2,"Plant a seed. It yields 3 Flock at your next Economy Phase, or 4 if the city matches your domain.",Green shoots before the last frost.
-PRO-C-01,Factory Explosion,Calamity,Production/Technology,Severe,6,"Target city loses 4 Flock and gets a Ruin token, which cuts its income by 1 until cleared.","The furnace went quiet for one strange second, and then it didn't."
-PRO-C-02,Collapse of the Works,Calamity,Production/Technology,Severe,6,"Destroy every structure in the target region, and each city there loses 1 Flock.","One beam gave way, and the whole district came down after it."
-PRO-C-03,Sabotage,Calamity,Production/Technology,Medium,4,Target player's cards cost 2 more for their next 2 turns.,"Sand in the gears, and no one saw who put it there."
-PRO-C-04,Broken Roads,Calamity,Production/Technology,Medium,4,"Target player's Prophet can't move for 2 turns, and its next move costs double.","The bridges are out, and the Prophet waits on the far bank."
-PRO-C-05,Mine Collapse,Calamity,Production/Technology,Medium,4,"Target city loses 3 Flock, and one structure there is destroyed.",They're still digging for the miners.
-PRO-C-06,Machine Breakdown,Calamity,Production/Technology,Moderate,3,"Destroy one structure in the target city. If it has none, the city loses 2 Flock instead.","The great wheel stops turning, and no one alive knows how to fix it."
-PRO-C-07,Red Tape,Calamity,Production/Technology,Moderate,3,Target player's next card costs 2 more.,Every permit needs another permit.
-PRO-C-08,Rusted Gears,Calamity,Production/Technology,Light,1,Target player's next card costs 1 more.,Nothing works quite as it should this week.
-PRO-C-09,Stalled Caravan,Calamity,Production/Technology,Light,2,Target player's Prophet can't move next turn.,The axle cracked a day outside the city.
-PRO-F-01,Cathedral of Industry,Favor,Production/Technology,Severe,6,Build: this city gives +2 income every turn.,"Smokestacks and bell towers, side by side."
-PRO-F-02,Railway,Favor,Production/Technology,Severe,6,"Build, linked to the city's region: your Prophet moves between cities in that region for free, and each city you control there gains 1 Flock now.","The first train arrives, and half the region comes to see it."
-PRO-F-03,Workshop,Favor,Production/Technology,Medium,4,Build: your cards cost 1 less while you control this city (maximum -2 from Workshops).,"Every tool has its place, and every hand its tool."
-PRO-F-04,City Walls,Favor,Production/Technology,Medium,4,"Build: Calamities against this city cost the caster 2 more, and the city loses 1 less Flock from each.","Stone on stone, and the people sleep easier."
-PRO-F-05,Repair Crews,Favor,Production/Technology,Medium,4,"Counter: remove a Ruin token, restore an Idle structure, or rebuild one destroyed this turn, then gain 1 Flock there.",By morning it's like nothing happened.
-PRO-F-06,Market,Favor,Production/Technology,Moderate,3,Build: this city gives +1 income.,"Trade brings strangers, and strangers bring faith."
-PRO-F-07,Paved Roads,Favor,Production/Technology,Moderate,3,"Build: moving your Prophet into or out of this city always costs 1 Flock, ignoring the domain wheel.",Even the far temples are a day's walk now.
-PRO-F-08,Efficient Tools,Favor,Production/Technology,Light,1,Your next card costs 2 less.,The new design cuts the work in half.
-PRO-F-09,Surveyors,Favor,Production/Technology,Light,2,Move your Prophet to any city for 1 Flock this turn without using your Action Phase.,The maps are finally right.
-HEA-C-01,The Great Plague,Calamity,Health/Fertility,Severe,6,"Target city loses 3 Flock. At the start of the target player's next turn, it rises from the discard pile, hits another city they control for 2, then goes back to the discard pile.",They thought it was over. They burned the bedding and opened the windows.
-HEA-C-02,Barren Years,Calamity,Health/Fertility,Severe,6,Target player discards 2 cards from their hand (their choice) and loses 1 Flock in each city they control.,"No children born in the city for two springs, and the temples empty."
-HEA-C-03,Fever,Calamity,Health/Fertility,Medium,4,"Target city loses 2 Flock, or 4 if another Health Calamity is in the discard pile.",It moves through the streets faster each time.
-HEA-C-04,Contagion,Calamity,Health/Fertility,Medium,4,Choose a Calamity in the discard pile costing 3 or less and play it for free against the target.,Old sicknesses never fully leave.
-HEA-C-05,Miasma,Calamity,Health/Fertility,Medium,4,"Target player discards 1 card at random, and one of their cities loses 2 Flock.","Bad air rising from the marsh, and everyone breathing it."
-HEA-C-06,Sickness of the Prophet,Calamity,Health/Fertility,Moderate,3,Target player's Prophet gains 1 strike.,"The Prophet falls ill mid-sermon, and the faithful start to wonder."
-HEA-C-07,Withering,Calamity,Health/Fertility,Moderate,3,"Target city loses 1 Flock for each Health Calamity in the discard pile, up to 3.",Every past sickness has left the city weaker for the next.
-HEA-C-08,Chills,Calamity,Health/Fertility,Light,1,Target player discards 1 card at random.,"A shiver, then a fog in the mind."
-HEA-C-09,Lingering Cough,Calamity,Health/Fertility,Light,2,"Target city loses 1 Flock, plus 1 from the target's reserve if another Health Calamity is in the discard pile.","Never bad enough to rest, never gone."
-HEA-F-01,Resurrection,Favor,Health/Fertility,Severe,6,"Bring back your removed Prophet or Hero with 0 strikes, and gain 3 Flock in their city. If neither has been removed, take any Favor card from the discard pile into your hand instead.","Three days in the tomb, and then the stone moved."
-HEA-F-02,Fertile Age,Favor,Health/Fertility,Severe,6,"Target city gains Flock equal to half its current Flock, rounded up (maximum 5).",Every household has a cradle that year.
-HEA-F-03,Remembered Prayers,Favor,Health/Fertility,Medium,4,Choose a Favor card in the discard pile costing 4 or less and play it for free.,"Old blessings, spoken again, still answer."
-HEA-F-04,Midwives,Favor,Health/Fertility,Medium,4,"Target city gains 2 Flock, plus 1 more for each Health Favor in the discard pile (maximum +3).",Every safe birth adds to their reputation.
-HEA-F-05,Cure,Favor,Health/Fertility,Medium,4,"Counter: cancel a Calamity just played on you, and put it on the bottom of its deck instead of the discard pile.","The healers find the cause, and burn it out."
-HEA-F-06,Healing Waters,Favor,Health/Fertility,Moderate,3,"Remove 1 strike from your Prophet or Hero, and gain 1 Flock in their city.",The Prophet bathes in the spring and rises clear-eyed.
-HEA-F-07,Second Life,Favor,Health/Fertility,Moderate,3,Take a Favor card costing 3 or less from the discard pile into your hand.,What was spent is not always gone.
-HEA-F-08,Herbal Remedy,Favor,Health/Fertility,Light,1,"Target city gains 1 Flock, or 2 if a Calamity hit it this turn.",Willow bark and patience.
-HEA-F-09,New Births,Favor,Health/Fertility,Light,2,"Target city gains 1 Flock, plus 1 more if a Health Favor is in the discard pile.",A small blessing that keeps coming.
-NEU-C-01,War,Calamity,Neutral,Severe,6,Target city loses 5 Flock.,"Neighbor against neighbor, and the gods' names on both banners."
-NEU-C-02,Schism,Calamity,Neutral,Severe,6,"Target city loses 3 Flock, and its owner's Prophet gains 1 strike.",Half the faithful walk out of the temple and don't come back.
-NEU-C-03,Fire in the Temple,Calamity,Neutral,Medium,4,Target city loses 3 Flock.,The oldest scrolls went first.
-NEU-C-04,False Prophet,Calamity,Neutral,Medium,4,"Target player's Prophet gains 1 strike, and the Prophet's city loses 1 Flock.","Another voice in the square, louder and easier to believe."
-NEU-C-05,Heresy,Calamity,Neutral,Medium,4,Target player loses 2 Flock from one city and 1 from reserve.,New ideas spread faster than old ones can answer them.
-NEU-C-06,Bandits,Calamity,Neutral,Medium,4,Target city loses 3 Flock.,The roads to the temple aren't safe anymore.
-NEU-C-07,Thieves,Calamity,Neutral,Moderate,3,Target city loses 2 Flock.,The offering bowl is empty by morning.
-NEU-C-08,Doubt,Calamity,Neutral,Moderate,3,Target city loses 2 Flock.,Nothing happened. That was the problem.
-NEU-C-09,Scandal,Calamity,Neutral,Moderate,3,Target player's Hero gains 1 strike.,The Hero was seen somewhere a Hero shouldn't be.
-NEU-C-10,Pilgrims Turn Away,Calamity,Neutral,Moderate,3,"Target city loses 1 Flock, and its owner loses 1 from reserve.","They came to the gates, heard the rumors, and kept walking."
-NEU-C-11,Bad Omen,Calamity,Neutral,Light,1,Target city loses 1 Flock.,"A black bird on the temple roof, three days running."
-NEU-C-12,Rumors,Calamity,Neutral,Light,1,Target city loses 1 Flock.,No one remembers who said it first.
-NEU-C-13,Desertion,Calamity,Neutral,Light,2,"Target city loses 1 Flock, and its owner loses 1 from reserve.",A few slip away in the night.
-NEU-C-14,Brawl,Calamity,Neutral,Light,2,Target city loses 2 Flock.,"It started over nothing, as these things do."
-NEU-F-01,Divine Visitation,Favor,Neutral,Severe,6,Target city gains 5 Flock.,"The god walks among them for one afternoon, and no one forgets it."
-NEU-F-02,Golden Age,Favor,Neutral,Severe,6,"Two cities you control each gain 2 Flock, and you gain 1 in reserve.","Peace, full bellies and full temples."
-NEU-F-03,Pilgrimage,Favor,Neutral,Medium,4,Target city gains 3 Flock.,"They come from every corner, carrying what they can."
-NEU-F-04,Sermon in the Square,Favor,Neutral,Medium,4,Your Prophet's city gains 3 Flock.,"The Prophet speaks, and the square goes quiet."
-NEU-F-05,Hero's Triumph,Favor,Neutral,Medium,4,"Your Hero's city gains 2 Flock, and your Hero loses 1 strike.","The Hero comes home, and the city spills into the streets."
-NEU-F-06,Temple Offering,Favor,Neutral,Medium,4,"Gain 2 in reserve, and target city gains 1 Flock.","Gold on the altar, and a few new faces in the pews."
-NEU-F-07,Revival,Favor,Neutral,Moderate,3,Target city gains 2 Flock.,Old believers remember why they believed.
-NEU-F-08,Wandering Preacher,Favor,Neutral,Moderate,3,Target city gains 2 Flock.,A stranger with dusty feet and a good story.
-NEU-F-09,Answered Prayer,Favor,Neutral,Moderate,3,Remove 1 strike from your Prophet or Hero.,"A sign, just in time."
-NEU-F-10,Feast Day,Favor,Neutral,Moderate,3,"Target city gains 1 Flock, and you gain 1 in reserve.","Bread, music and the god's name in every toast."
-NEU-F-11,Omen of Hope,Favor,Neutral,Light,1,Target city gains 1 Flock.,"A rainbow over the temple, and everyone sees it."
-NEU-F-12,New Convert,Favor,Neutral,Light,1,Target city gains 1 Flock.,"Just one, but one who brings their family."
-NEU-F-13,Alms,Favor,Neutral,Light,2,Gain 2 in reserve.,"Small gifts, given often."
-NEU-F-14,Testimony,Favor,Neutral,Light,2,"Target city gains 1 Flock, and you gain 1 in reserve.","One believer's story, told at every dinner table."
+NAT-C-01,Wildfire,Calamity,Nature,Cataclysmic,6,"Target city loses 5 Flock, and one neighbor loses 3.","A dry summer, a single spark, and the hills burn for a week."
+NAT-C-02,Great Flood,Calamity,Nature,Cataclysmic,6,Every city in the target region loses 3 Flock.,"The river forgets its banks, and three cities wake up underwater."
+NAT-C-03,Tornado,Calamity,Nature,Major,4,"Target loses 3 Flock, and one neighbor loses 2.",It touches down in the square and doesn't lift until the next town over.
+NAT-C-04,Earthquake,Calamity,Nature,Major,4,"Target loses 3 Flock, and one neighbor loses 1. Neither city can receive Flock next turn.","The ground splits, and the roads between cities go with it."
+NAT-C-05,Avalanche,Calamity,Nature,Major,4,"Target loses 2 Flock, and every other city in the region loses 1.",The mountain lets go all at once.
+NAT-C-06,Hailstorm,Calamity,Nature,Minor,3,"Target loses 2 Flock, and one neighbor loses 1.","Ice the size of fists, and no roof that can hold it."
+NAT-C-07,Wild Beasts,Calamity,Nature,Minor,3,"Target loses 2 Flock, and its owner can't move Flock out of that city next turn.","Wolves on the roads at night, and no one travels."
+NAT-C-08,Thick Fog,Calamity,Nature,Slight,1,Target and one neighbor each lose 1 Flock.,For three days no one can see the temple steps.
+NAT-C-09,Strong Winds,Calamity,Nature,Slight,2,Move 1 of the target player's Flock to a neighboring city they don't control.,Some who flee the storm never find their way home.
+NAT-F-01,Great Migration,Favor,Nature,Cataclysmic,6,"Target gains 5 Flock, and one neighbor gains 3.","Herds and families move together, following the god who called them."
+NAT-F-02,Spring Awakening,Favor,Nature,Cataclysmic,6,Every city in the target region where you have Flock gains 2.,"The thaw comes early, and the whole valley turns green overnight."
+NAT-F-03,Fertile Floodplain,Favor,Nature,Major,4,"Target gains 3 Flock, and one neighbor gains 2.",The river rises gently and leaves rich soil where it falls back.
+NAT-F-04,Sacred Grove,Favor,Nature,Major,4,"Target gains 2 Flock, and every other city in the region where you have Flock gains 1.",Pilgrims come to the old trees and stay for the shade.
+NAT-F-05,Shelter of the Wild,Favor,Nature,Major,4,"Counter: cancel a Calamity just played on one of your cities, then that city and one neighbor each gain 1.",The forest closes around them like a cloak.
+NAT-F-06,Gentle Rain,Favor,Nature,Minor,3,"Target gains 2 Flock, and one neighbor gains 1.","Not a storm, just enough."
+NAT-F-07,Animal Guides,Favor,Nature,Minor,3,"Move up to 2 of your Flock into a neighboring city, then add 1 more there.","Follow the deer, the elders say, and you'll find the way."
+NAT-F-08,Morning Dew,Favor,Nature,Slight,1,Target and one neighbor each gain 1 Flock.,Every leaf shines at dawn.
+NAT-F-09,Tailwind,Favor,Nature,Slight,2,Take 1 of an opponent's Flock from a neighboring city and make it yours.,A kind wind carries the curious to new temples.
+HAR-C-01,Famine,Calamity,Harvest,Cataclysmic,6,Target player gains no Flock income for their next 2 Economy Phases.,"The granaries are empty, and the faithful start asking whose fault it is."
+HAR-C-02,Blight,Calamity,Harvest,Cataclysmic,6,"Target city loses 2 Flock now, then 1 more at the start of each of its owner's next 3 turns.","It starts as a few black leaves, and then it's every field."
+HAR-C-03,Locust Swarm,Calamity,Harvest,Major,4,Target player loses 3 Flock from reserve. Anything they can't pay comes out of their cities.,"The sky goes dark at noon, and the sound never stops."
+HAR-C-04,Failed Harvest,Calamity,Harvest,Major,4,Target city produces no income for 2 turns.,"The crop came in thin, and no one has anything to spare."
+HAR-C-05,Drought,Calamity,Harvest,Major,4,Target city loses 1 Flock at the start of each of its owner's next 3 turns.,Each morning the well is a little deeper.
+HAR-C-06,Spoiled Stores,Calamity,Harvest,Minor,3,Target player loses 2 Flock from reserve.,Damp got into the cellars over winter.
+HAR-C-07,Late Frost,Calamity,Harvest,Minor,3,Target city loses 1 Flock now and 1 next turn.,One cold night in spring undoes a month of work.
+HAR-C-08,Weevils,Calamity,Harvest,Slight,1,Target player loses 1 Flock from reserve.,"Small, patient and always hungry."
+HAR-C-09,Rot in the Granary,Calamity,Harvest,Slight,2,"Target player's next income is halved, rounded down.",Half the grain is good. No one can say which half.
+HAR-F-01,Bountiful Harvest,Favor,Harvest,Cataclysmic,6,Plant a seed. It yields 8 Flock at your next Economy Phase.,"The whole city turns out for the reaping, and still they can't carry it all."
+HAR-F-02,Season of Plenty,Favor,Harvest,Cataclysmic,6,"For your next 3 Economy Phases, every city you control gives +1 extra income.","Three good years in a row, and the faithful remember who to thank."
+HAR-F-03,Planting Festival,Favor,Harvest,Major,4,Plant a seed. It yields 5 Flock at your next Economy Phase.,"Songs in the fields, and every hand in the soil."
+HAR-F-04,Full Granary,Favor,Harvest,Major,4,Gain 3 Flock in reserve now and 1 more next turn.,"Stores enough to last the winter, and then some."
+HAR-F-05,Rationing,Favor,Harvest,Major,4,"Cancel one ongoing effect on you or your cities (e.g. Famine, Blight or Drought), then gain 2 in reserve.","Less bread for everyone, but bread for everyone."
+HAR-F-06,Seedbed,Favor,Harvest,Minor,3,Plant a seed. It yields 4 Flock at your next Economy Phase.,"Small rows, carefully tended."
+HAR-F-07,Stockpile,Favor,Harvest,Minor,3,Gain 2 Flock in reserve now and 1 more at your next Economy Phase.,"Put a little aside, the elders say, and it comes back to you."
+HAR-F-08,Gleaners,Favor,Harvest,Slight,1,Gain 1 Flock in reserve.,The poor walk the fields after the harvest and find enough.
+HAR-F-09,Early Sprouts,Favor,Harvest,Slight,2,"Plant a seed. It yields 3 Flock at your next Economy Phase, or 4 if the city matches your domain.",Green shoots before the last frost.
+PRO-C-01,Factory Explosion,Calamity,Production/Technology,Cataclysmic,6,"Target city loses 4 Flock and gets a Ruin token, which cuts its income by 1 until cleared.","The furnace went quiet for one strange second, and then it didn't."
+PRO-C-02,Collapse of the Works,Calamity,Production/Technology,Cataclysmic,6,"Destroy every structure in the target region, and each city there loses 1 Flock.","One beam gave way, and the whole district came down after it."
+PRO-C-03,Sabotage,Calamity,Production/Technology,Major,4,Target player's cards cost 2 more for their next 2 turns.,"Sand in the gears, and no one saw who put it there."
+PRO-C-04,Broken Roads,Calamity,Production/Technology,Major,4,"Target player's Prophet can't move for 2 turns, and its next move costs double.","The bridges are out, and the Prophet waits on the far bank."
+PRO-C-05,Mine Collapse,Calamity,Production/Technology,Major,4,"Target city loses 3 Flock, and one structure there is destroyed.",They're still digging for the miners.
+PRO-C-06,Machine Breakdown,Calamity,Production/Technology,Minor,3,"Destroy one structure in the target city. If it has none, the city loses 2 Flock instead.","The great wheel stops turning, and no one alive knows how to fix it."
+PRO-C-07,Red Tape,Calamity,Production/Technology,Minor,3,Target player's next card costs 2 more.,Every permit needs another permit.
+PRO-C-08,Rusted Gears,Calamity,Production/Technology,Slight,1,Target player's next card costs 1 more.,Nothing works quite as it should this week.
+PRO-C-09,Stalled Caravan,Calamity,Production/Technology,Slight,2,Target player's Prophet can't move next turn.,The axle cracked a day outside the city.
+PRO-F-01,Grand Foundry,Favor,Production/Technology,Cataclysmic,6,Build: this city gives +2 income every turn.,"Smokestacks and bell towers, side by side."
+PRO-F-02,Railway,Favor,Production/Technology,Cataclysmic,6,"Build, linked to the city's region: your Prophet moves between cities in that region for free, and each city you control there gains 1 Flock now.","The first train arrives, and half the region comes to see it."
+PRO-F-03,Workshop,Favor,Production/Technology,Major,4,Build: your cards cost 1 less while you control this city (maximum -2 from Workshops).,"Every tool has its place, and every hand its tool."
+PRO-F-04,City Walls,Favor,Production/Technology,Major,4,"Build: Calamities against this city cost the caster 2 more, and the city loses 1 less Flock from each.","Stone on stone, and the people sleep easier."
+PRO-F-05,Repair Crews,Favor,Production/Technology,Major,4,"Remove a Ruin token, restore an Idle structure, or rebuild one destroyed since your last turn, then gain 1 Flock there.",By morning it's like nothing happened.
+PRO-F-06,Market,Favor,Production/Technology,Minor,3,Build: this city gives +1 income.,"Trade brings strangers, and strangers bring faith."
+PRO-F-07,Paved Roads,Favor,Production/Technology,Minor,3,"Build: moving your Prophet into or out of this city always costs 1 Flock, ignoring the domain wheel.",Even the far temples are a day's walk now.
+PRO-F-08,Efficient Tools,Favor,Production/Technology,Slight,1,Your next card costs 2 less.,The new design cuts the work in half.
+PRO-F-09,Surveyors,Favor,Production/Technology,Slight,2,Move your Prophet to any city for 1 Flock this turn without using your Action Phase.,The maps are finally right.
+HEA-C-01,The Great Plague,Calamity,Health/Fertility,Cataclysmic,6,"Target city loses 3 Flock. At the start of the target player's next turn, it rises from the discard pile, hits another city they control for 2, then goes back to the discard pile.",They thought it was over. They burned the bedding and opened the windows.
+HEA-C-02,Barren Years,Calamity,Health/Fertility,Cataclysmic,6,Target player discards 2 cards from their hand (their choice) and loses 1 Flock in each city they control.,"No children born in the city for two springs, and the temples empty."
+HEA-C-03,Fever,Calamity,Health/Fertility,Major,4,"Target city loses 2 Flock, or 4 if another Health Calamity is in the discard pile.",It moves through the streets faster each time.
+HEA-C-04,Contagion,Calamity,Health/Fertility,Major,4,Choose a Calamity in the discard pile costing 3 or less and play it for free against the target.,Old sicknesses never fully leave.
+HEA-C-05,Miasma,Calamity,Health/Fertility,Major,4,"Target player discards 1 card at random, and one of their cities loses 2 Flock.","Bad air rising from the marsh, and everyone breathing it."
+HEA-C-06,Sickness of the Prophet,Calamity,Health/Fertility,Minor,3,Target player's Prophet gains 1 strike.,"The Prophet falls ill mid-sermon, and the faithful start to wonder."
+HEA-C-07,Withering,Calamity,Health/Fertility,Minor,3,"Target city loses 1 Flock for each Health Calamity in the discard pile, up to 3.",Every past sickness has left the city weaker for the next.
+HEA-C-08,Chills,Calamity,Health/Fertility,Slight,1,Target player discards 1 card at random.,"A shiver, then a fog in the mind."
+HEA-C-09,Lingering Cough,Calamity,Health/Fertility,Slight,2,"Target city loses 1 Flock, plus 1 from the target's reserve if another Health Calamity is in the discard pile.","Never bad enough to rest, never gone."
+HEA-F-01,Resurrection,Favor,Health/Fertility,Cataclysmic,6,"Bring back your removed Prophet or Hero with 0 strikes, and gain 3 Flock in their city. If neither has been removed, take any Favor card from the discard pile into your hand instead.","Three days in the tomb, and then the stone moved."
+HEA-F-02,Fertile Age,Favor,Health/Fertility,Cataclysmic,6,"Target city gains Flock equal to half its current Flock, rounded up (maximum 5).",Every household has a cradle that year.
+HEA-F-03,Remembered Prayers,Favor,Health/Fertility,Major,4,Choose a Favor card in the discard pile costing 4 or less and play it for free.,"Old blessings, spoken again, still answer."
+HEA-F-04,Midwives,Favor,Health/Fertility,Major,4,"Target city gains 2 Flock, plus 1 more for each Health Favor in the discard pile (maximum +3).",Every safe birth adds to their reputation.
+HEA-F-05,Cure,Favor,Health/Fertility,Major,4,"Counter: cancel a Calamity just played on you, and put it on the bottom of its deck instead of the discard pile.","The healers find the cause, and burn it out."
+HEA-F-06,Healing Waters,Favor,Health/Fertility,Minor,3,"Remove 1 strike from your Prophet or Hero, and gain 1 Flock in their city.",The Prophet bathes in the spring and rises clear-eyed.
+HEA-F-07,Second Life,Favor,Health/Fertility,Minor,3,Take a Favor card costing 3 or less from the discard pile into your hand.,What was spent is not always gone.
+HEA-F-08,Herbal Remedy,Favor,Health/Fertility,Slight,1,"Target city gains 1 Flock, or 2 if a Calamity hit it this turn.",Willow bark and patience.
+HEA-F-09,New Births,Favor,Health/Fertility,Slight,2,"Target city gains 1 Flock, plus 1 more if a Health Favor is in the discard pile.",A small blessing that keeps coming.
+NEU-C-01,War,Calamity,Neutral,Cataclysmic,6,Target city loses 5 Flock.,"Neighbor against neighbor, and the gods' names on both banners."
+NEU-C-02,Schism,Calamity,Neutral,Cataclysmic,6,"Target city loses 3 Flock, and its owner's Prophet gains 1 strike.",Half the faithful walk out of the temple and don't come back.
+NEU-C-03,Fire in the Temple,Calamity,Neutral,Major,4,Target city loses 3 Flock.,The oldest scrolls went first.
+NEU-C-04,False Prophet,Calamity,Neutral,Major,4,"Target player's Prophet gains 1 strike, and the Prophet's city loses 1 Flock.","Another voice in the square, louder and easier to believe."
+NEU-C-05,Heresy,Calamity,Neutral,Major,4,Target player loses 2 Flock from one city and 1 from reserve.,New ideas spread faster than old ones can answer them.
+NEU-C-06,Bandits,Calamity,Neutral,Major,4,Target city loses 3 Flock.,The roads to the temple aren't safe anymore.
+NEU-C-07,Thieves,Calamity,Neutral,Minor,3,Target city loses 2 Flock.,The offering bowl is empty by morning.
+NEU-C-08,Doubt,Calamity,Neutral,Minor,3,Target city loses 2 Flock.,Nothing happened. That was the problem.
+NEU-C-09,Scandal,Calamity,Neutral,Minor,3,Target player's Hero gains 1 strike.,The Hero was seen somewhere a Hero shouldn't be.
+NEU-C-10,Pilgrims Turn Away,Calamity,Neutral,Minor,3,"Target city loses 1 Flock, and its owner loses 1 from reserve.","They came to the gates, heard the rumors, and kept walking."
+NEU-C-11,Bad Omen,Calamity,Neutral,Slight,1,Target city loses 1 Flock.,"A black bird on the temple roof, three days running."
+NEU-C-12,Rumors,Calamity,Neutral,Slight,1,Target city loses 1 Flock.,No one remembers who said it first.
+NEU-C-13,Desertion,Calamity,Neutral,Slight,2,"Target city loses 1 Flock, and its owner loses 1 from reserve.",A few slip away in the night.
+NEU-C-14,Brawl,Calamity,Neutral,Slight,2,Target city loses 2 Flock.,"It started over nothing, as these things do."
+NEU-F-01,Divine Visitation,Favor,Neutral,Cataclysmic,6,Target city gains 5 Flock.,"The god walks among them for one afternoon, and no one forgets it."
+NEU-F-02,Golden Age,Favor,Neutral,Cataclysmic,6,"Two cities you control each gain 2 Flock, and you gain 1 in reserve.","Peace, full bellies and full temples."
+NEU-F-03,Pilgrimage,Favor,Neutral,Major,4,Target city gains 3 Flock.,"They come from every corner, carrying what they can."
+NEU-F-04,Sermon in the Square,Favor,Neutral,Major,4,Your Prophet's city gains 3 Flock.,"The Prophet speaks, and the square goes quiet."
+NEU-F-05,Hero's Triumph,Favor,Neutral,Major,4,"Your Hero's city gains 2 Flock, and your Hero loses 1 strike.","The Hero comes home, and the city spills into the streets."
+NEU-F-06,Temple Offering,Favor,Neutral,Major,4,"Gain 2 in reserve, and target city gains 1 Flock.","Gold on the altar, and a few new faces in the pews."
+NEU-F-07,Revival,Favor,Neutral,Minor,3,Target city gains 2 Flock.,Old believers remember why they believed.
+NEU-F-08,Wandering Preacher,Favor,Neutral,Minor,3,Target city gains 2 Flock.,A stranger with dusty feet and a good story.
+NEU-F-09,Answered Prayer,Favor,Neutral,Minor,3,Remove 1 strike from your Prophet or Hero.,"A sign, just in time."
+NEU-F-10,Feast Day,Favor,Neutral,Minor,3,"Target city gains 1 Flock, and you gain 1 in reserve.","Bread, music and the god's name in every toast."
+NEU-F-11,Omen of Hope,Favor,Neutral,Slight,1,Target city gains 1 Flock.,"A rainbow over the temple, and everyone sees it."
+NEU-F-12,New Convert,Favor,Neutral,Slight,1,Target city gains 1 Flock.,"Just one, but one who brings their family."
+NEU-F-13,Alms,Favor,Neutral,Slight,2,Gain 2 in reserve.,"Small gifts, given often."
+NEU-F-14,Testimony,Favor,Neutral,Slight,2,"Target city gains 1 Flock, and you gain 1 in reserve.","One believer's story, told at every dinner table."
 FW-P-01,Crisis of Faith,Free Will,Prophet,Loss,,The Prophet questions the god in public. Their city loses 2 Flock.,"""What if no one is listening?"""
 FW-P-02,The Rival Preacher,Free Will,Prophet,Roll,,The Prophet debates a rival in the square. 1-2: lose 2 Flock. 3-4: nothing. 5-6: gain 3.,"Two voices, one crowd."
 FW-P-03,The Long Fast,Free Will,Prophet,Roll,,The Prophet goes into the desert for 40 days. 1-2: their city loses 1 and the Prophet can't move next turn. 3-6: gain 2.,"They come back thinner, and either wiser or broken."

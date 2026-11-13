@@ -158,11 +158,24 @@ export function parseCharacters(text: string): Character[] {
 export function parseCities(text: string): City[] {
   const file = "cities.csv";
   const rows = readCsv(text, file, [
-    "name", "region", "size", "need", "population", "convert_at", "convert_at_matched", "income", "holy_site_cap",
+    "name", "region", "size", "need", "population", "convert_at", "convert_at_matched",
+    "convert_at_temple", "convert_at_temple_matched", "lose_below", "income", "holy_site_cap",
   ]);
   const cities = rows.map((row, i): City => {
     const r = rowContext(file, i, row);
     const need = r.oneOf<Domain | "None">("need", [...DOMAINS, "None"]);
+    const holySiteCap = r.oneOf<HolySiteLevel>("holy_site_cap", ["Shrine", "Temple", "Cathedral"]);
+    const convertAtTemple = r.optionalNumber("convert_at_temple");
+    const convertAtTempleMatched = r.optionalNumber("convert_at_temple_matched");
+    // A city that can't have a Temple shouldn't list Temple thresholds, and one that can, must.
+    const canHaveTemple = holySiteCap !== "Shrine";
+    if (canHaveTemple !== (convertAtTemple !== null) || canHaveTemple !== (convertAtTempleMatched !== null)) {
+      r.fail(
+        canHaveTemple
+          ? "this city can have a Temple, so it needs convert_at_temple and convert_at_temple_matched"
+          : "this city's Holy Site cap is Shrine, so the Temple thresholds should be empty",
+      );
+    }
     return {
       name: r.text("name"),
       region: r.oneOf("region", ["A", "B", "C"] as const),
@@ -171,8 +184,11 @@ export function parseCities(text: string): City[] {
       population: r.number("population"),
       convertAt: r.number("convert_at"),
       convertAtMatched: r.number("convert_at_matched"),
+      convertAtTemple,
+      convertAtTempleMatched,
+      loseBelow: r.number("lose_below"),
       income: r.number("income"),
-      holySiteCap: r.oneOf<HolySiteLevel>("holy_site_cap", ["Shrine", "Temple", "Cathedral"]),
+      holySiteCap,
     };
   });
   checkUniqueIds(file, cities.map((c) => c.name));

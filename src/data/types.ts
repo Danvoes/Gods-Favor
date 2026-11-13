@@ -17,7 +17,7 @@ export const DECKS = ["Calamity", "Favor", "Free Will"] as const;
 export type Deck = (typeof DECKS)[number];
 
 /** Power tiers for Calamity and Favor cards, strongest first. */
-export const POWER_TIERS = ["Severe", "Medium", "Moderate", "Light"] as const;
+export const POWER_TIERS = ["Cataclysmic", "Major", "Minor", "Slight"] as const;
 export type PowerTier = (typeof POWER_TIERS)[number];
 
 /** Free Will cards use the tier column for their outcome type instead. */
@@ -83,6 +83,11 @@ export interface City {
   population: number;
   convertAt: number;
   convertAtMatched: number;
+  /** Thresholds for rivals once a Temple or Cathedral stands here. Null for small cities (Shrine cap). */
+  convertAtTemple: number | null;
+  convertAtTempleMatched: number | null;
+  /** A controller with fewer Flock than this here loses the city at their Economy Phase. */
+  loseBelow: number;
   income: number;
   holySiteCap: HolySiteLevel;
 }

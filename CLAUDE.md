@@ -7,12 +7,12 @@ A digital version of the board game Gods' Favor. The owner is the game's designe
 Full rules: `docs/RULES.md`. That file and the CSVs in `data/` are the designer's source of truth. Never change rules text or card data to make code easier; ask instead.
 
 - 2–4 players are gods, each with one domain: Nature, Harvest, Production/Technology, Health/Fertility. Domains sit on a wheel: adjacent cost 3, opposite cost 5 (Nature↔Production, Harvest↔Health).
-- They compete for **Flock** (followers) across 9 cities in 3 regions (`data/cities.csv`). A city converts to you at 51% of its population in your Flock (41% if its need matches your domain).
+- They compete for **Flock** (followers) across 9 cities in 3 regions (`data/cities.csv`, which lists every threshold; percentages round up). Reaching 51% of a city's population (41% if its need matches your domain, +10 points for rivals of a Temple/Cathedral) makes it convert **at the start of your next Economy Phase** if you still meet it. A controller below 25% loses the city at their Economy Phase.
 - **Win:** control 2 of 3 regions (2 of 3 cities each) and still hold them at the start of your next turn.
-- **Turn:** Draw (refill to 5 from Calamity or Favor) → Prophecy (Free Will cards, 1 per controlled city) → Economy (income) → Action (one of: cast a card, move Prophet, Hero battle, build/upgrade Holy Site) → End (conversions, victory, expire markers).
-- **Decks** (`data/cards.csv`): Calamity 50, Favor 50 (9 per domain + 14 Neutral each; tiers Severe/Medium/Moderate/Light, cost 1–6), Free Will 30 (15 Prophet + 15 Hero, typed Loss/Roll/Gain).
+- **Turn:** Draw (refill to 5 from Calamity or Favor) → Prophecy (Free Will cards, 1 per controlled city) → Economy (lose cities below 25%, convert, income, place Flock, seeds/ongoing) → Action (one of: cast a card, move Prophet, Hero battle, build/upgrade Holy Site) → End (victory check, expire markers).
+- **Decks** (`data/cards.csv`): Calamity 50, Favor 50 (9 per domain + 14 Neutral each; tiers Cataclysmic 6 / Major 4 / Minor 3 / Slight 1–2), Free Will 30 (15 Prophet + 15 Hero, typed Loss/Roll/Gain). Three discard piles.
 - **Characters** (`data/characters.csv`): 2 Prophets + 2 Heroes per domain, each with 3 tiers of powers. You get one of each on your first conversion. Prophets convert; Heroes fight with Might/Resolve dice battles.
-- Off-domain cards must be played immediately when drawn; own-domain and Neutral cards can be held.
+- Any card can be held. Costs come from reserve first, then cities of your choice. City Calamities name one target player and hit only their Flock. Favors add your own Flock to cities you control or have Flock in. Only Shelter of the Wild and Cure are counters (playable on any turn). A player whose domain matches a Calamity may pay its cost to redirect it once.
 
 Open rules questions are tracked in `docs/RULES-QUESTIONS.md`. Don't silently pick an answer for one of those. Ask, or make the choice easy to change and note it there.
 
