@@ -62,7 +62,7 @@ When a city's need matches your domain, it is easier to convert (41% instead of 
 
 ### Conversion
 
-When your Flock in a city reaches its threshold, the city is not yours yet. It converts **at the start of your next Economy Phase**, if your Flock there is still at or above the threshold. This gives rivals one round to push you back.
+When your Flock in a city reaches its threshold, the city is not yours yet. It converts **at the start of your next turn**, if your Flock there is still at or above the threshold. Anything that pushes you over during your own turn, including Free Will gains, waits a full round, so rivals always get one chance to push you back.
 
 - The threshold is 51% of the city's population, or 41% if the city's need matches your domain.
 - A Temple (or Cathedral) in the city adds 10 percentage points for rivals: 61%, or 51% if matched.
@@ -70,7 +70,7 @@ When your Flock in a city reaches its threshold, the city is not yours yet. It c
 
 ### Losing a city
 
-You keep a converted city even if your Flock there falls below the threshold. But at the start of your Economy Phase, any city you control where your Flock is **below 25% of its population** becomes uncontrolled.
+You keep a converted city even if your Flock there falls below the threshold. But at the start of your turn, any city you control where your Flock is **below 25% of its population** becomes uncontrolled.
 
 ### Income
 
@@ -108,26 +108,25 @@ Any god can raise a Holy Site in a city they control, as their Action Phase. Eac
 | Temple | 8 more Flock | +2 | Rivals need 10 percentage points more to convert this city |
 | Cathedral | 14 more Flock | +3 | Keeps the Temple effect; defenders get +1 Resolve in battles here |
 
-When the city changes hands, its Holy Site is desecrated and drops one level: a Cathedral becomes a Temple, a Temple becomes a Shrine, and a Shrine is removed. Holy Sites are not structures, so cards that destroy structures can't touch them.
+When a city's controller loses it, whether a rival converts it or it goes uncontrolled below 25%, its Holy Site is desecrated and drops one level: a Cathedral becomes a Temple, a Temple becomes a Shrine, and a Shrine is removed. It drops only once per loss, so converting an uncontrolled city doesn't drop it again. An uncontrolled city's Holy Site gives no income. Holy Sites are not structures, so cards that destroy structures can't touch them.
 
 ## Turn sequence
 
-Each turn runs through five phases in this order.
+Each turn runs through six phases in this order.
 
-1. **Draw.** Refill your hand to 5 cards, choosing the Calamity or Favor deck for each draw.
-2. **Prophecy.** Once you control a city, draw 1 Free Will card, plus 1 more for each additional city you control, and resolve them (see Free Will and strikes).
-3. **Economy.** In this order:
+1. **Start.** In this order:
    1. Any city you control where your Flock is below 25% of its population becomes uncontrolled.
    2. Any city where your Flock is at or above its threshold converts to you.
-   3. Collect income (see Income). Your Prophet also adds +1 Flock in an uncontrolled city where it is stationed.
-   4. Place income and any reserve Flock on the board, or keep them in reserve.
-   5. Seeds and ongoing effects pay out or tick down.
-4. **Action.** Do one of these:
+   3. If you were marked as holding 2 regions at the end of your last turn and still control 2 regions now, you win.
+2. **Draw.** Refill your hand to 5 cards, choosing the Calamity or Favor deck for each draw.
+3. **Prophecy.** Once you control a city, draw 1 Free Will card, plus 1 more for each additional city you control, and resolve them (see Free Will and strikes).
+4. **Economy.** Collect income (see Income); your Prophet also adds +1 Flock in an uncontrolled city where it is stationed. Place income and any reserve Flock on the board, or keep them in reserve. Then seeds and ongoing effects pay out or tick down.
+5. **Action.** Do one of these:
    - Cast one Calamity or Favor card
    - Move your Prophet
    - Send your Hero into battle
    - Build or upgrade a Holy Site
-5. **End.** Check for victory, and remove any markers that have run out.
+6. **End.** If you control 2 of the 3 regions, you are marked as holding them. Remove any markers that have run out.
 
 Counter cards, redirects, Favors used to cancel Free Will losses, and Production's Armory can be used outside the Action Phase.
 
@@ -150,12 +149,12 @@ Calamity cards are disasters you inflict; Favor cards are miracles you grant. Ea
 ### Targeting
 
 - **Calamities on a city** name one target player. They remove only that player's Flock in the target city, and in any neighboring cities the effect spreads to. If that player has no Flock in a city, that part does nothing. You may target your own cities.
-- **Favors** always add your own Flock. They can target any city you control or where you already have Flock.
+- **Favors** always add your own Flock. Their main target must be a city you control or where you already have Flock. When a Favor or Free Will card also adds or moves Flock into "one neighbor" (Great Migration, Gentle Rain, Animal Guides, The Young Disciple and similar), that neighbor can be any neighboring city, even one where you have nothing yet.
 - **Seeds** can be planted in any city you control or where you have Flock.
 
 ### Redirecting
 
-Whenever anyone plays a Calamity of your domain, at anyone, you may pay its cost to choose a new target player for it. Each Calamity can be redirected only once.
+Whenever anyone plays a Calamity of your domain, at anyone, you may pay its cost to choose a new target player for it. Each Calamity can be redirected only once. Redirecting a punishment Calamity (see Free Will and strikes) costs its cost +2.
 
 ### Domain identities
 
@@ -200,17 +199,18 @@ Every character has three tiers of powers (`tier_1`, `tier_2`, `tier_3` in `data
 | Hero | On arrival | 2 Renown | 4 Renown |
 
 - **Prophets** count every city you have ever converted, so a Prophet never drops a tier.
-- **Heroes** count their current Renown. A Hero earns 1 Renown per battle won, and gains +1 to a stat of your choice on reaching each new tier. If Renown drops below a tier's requirement (for example, from Blood on Their Hands), the Hero loses that tier's power **and** its +1 stat until the tier is reached again.
+- **Heroes** count their current Renown. A Hero earns 1 Renown per battle won, and gains +1 to a stat of your choice on reaching each new tier. If Renown drops below a tier's requirement (for example, from Blood on Their Hands), the Hero loses that tier's power **and** its +1 stat until the tier is reached again. When it is regained, you choose the stat again.
+- **Distinct cities.** "Cities converted" counts each city once per game. Winning back a city you have converted before doesn't count again for Prophet tiers or strike resets.
 
 ### Free Will and strikes
 
 Free Will cards are events your Prophet or Hero causes. Each is a **Loss**, a **Roll** or a **Gain**.
 
 1. **Roll first.** For a Roll card, roll the die before deciding anything.
-2. **If the result costs you Flock**, you may discard any Favor card from your hand (free) to cancel the loss completely. Nothing else happens.
-3. **If you don't cancel it**, the loss happens, and you must also choose one:
+2. **If the result is harmful** (it costs Flock or Renown, lowers a stat or army, or stops a character moving or fighting), you may discard any Favor card from your hand (free) to cancel the whole card, including any good parts of it (such as The Merchant's Gold's +2). Nothing else happens.
+3. **If you don't cancel it**, the card resolves, and you must also choose one:
    - **Take a strike** on that character. This is always possible.
-   - **Punish** your character by playing a Calamity from your hand against yourself, for free. Its effect resolves on you, and no strike is taken.
+   - **Punish** your character by playing a Calamity from your hand against yourself, for free. Its effect resolves on you, and no strike is taken. If it is redirected, the redirect costs +2.
 4. **Where Flock comes from and goes.** Free Will losses come from the character's city; anything beyond what is there comes from reserve. Free Will gains go to the character's city.
 5. **Missing character.** A Free Will card for a character you no longer have is discarded with no effect.
 
@@ -225,7 +225,7 @@ A battle lets your Hero take Flock from a rival by force, at the cost of followe
 1. **March.** As your Action Phase, move your Hero to a city where a rival has Flock (1 Flock) and commit 1 to 5 Flock as your army. The army can be any mix of your Flock in that city and your reserve. You don't need Flock in the city already.
 2. **Defender chooses.**
    - **Defend:** commit any number of their Flock in that city, up to the size of the attacker's army. Their Hero fights if it's there.
-   - **Yield:** hand over 2 of their Flock in that city, which become the attacker's Flock there. The attacker's army stays in the city. No battle, no strike, no Renown.
+   - **Yield:** hand over 2 of their Flock in that city (or all of them, if they have fewer), which become the attacker's Flock there. The attacker's army stays in the city. No battle, no strike, no Renown.
 3. **Fight rounds.** Each round, both roll a die and add:
    - Might (attacker) or Resolve (defender). A defender with no Hero in the city adds 0.
    - +1 to whichever side's domain matches the city's need.
@@ -234,7 +234,7 @@ A battle lets your Hero take Flock from a rival by force, at the cost of followe
    The lower roll loses 1 committed Flock for good; a tie costs both sides 1.
 4. **Retreat or press on.** After any round, the attacker may retreat. The surviving army goes to the attacker's reserve, the Hero returns to the city it marched from, and the Hero takes a strike. No spoils, no Renown.
 5. **Spoils.** The battle ends when one army is gone.
-   - **Attacker wins:** the surviving army and the Hero stay in the city, the attacker takes 2 more of the defender's Flock there, the defender's Hero (if it fought) takes a strike, and the attacking Hero earns 1 Renown.
+   - **Attacker wins:** the surviving army and the Hero stay in the city, the attacker takes 2 more of the defender's Flock there, the defender's Hero (if it fought) takes a strike and falls back to a city its owner controls in the same region (owner's choice), or any controlled city if there is none in the region, and the attacking Hero earns 1 Renown.
    - **Defender wins:** the defender's surviving Flock stay, they take 2 of the attacker's Flock in that city if there are any, the attacking Hero takes a strike and returns to the city it marched from, and the defending Hero (if it fought) earns 1 Renown.
 
 | Domain | Hero trait (Tier I) |
@@ -246,7 +246,7 @@ A battle lets your Hero take Flock from a rival by force, at the cost of followe
 
 ## Winning
 
-You win by controlling 2 of the 3 regions and still holding them at the start of your next turn. Rivals get one full round to break your hold. You control a region when you control 2 of its 3 cities.
+You win by controlling 2 of the 3 regions at the end of your turn and still holding them at the start of your next turn, after that turn's conversion and loss checks. Rivals get one full round to break your hold. You control a region when you control 2 of its 3 cities.
 
 ## Playtest watch list
 

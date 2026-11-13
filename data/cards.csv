@@ -16,7 +16,7 @@ NAT-F-05,Shelter of the Wild,Favor,Nature,Major,4,"Counter: cancel a Calamity ju
 NAT-F-06,Gentle Rain,Favor,Nature,Minor,3,"Target gains 2 Flock, and one neighbor gains 1.","Not a storm, just enough."
 NAT-F-07,Animal Guides,Favor,Nature,Minor,3,"Move up to 2 of your Flock into a neighboring city, then add 1 more there.","Follow the deer, the elders say, and you'll find the way."
 NAT-F-08,Morning Dew,Favor,Nature,Slight,1,Target and one neighbor each gain 1 Flock.,Every leaf shines at dawn.
-NAT-F-09,Tailwind,Favor,Nature,Slight,2,Take 1 of an opponent's Flock from a neighboring city and make it yours.,A kind wind carries the curious to new temples.
+NAT-F-09,Tailwind,Favor,Nature,Slight,2,Choose a city where you have Flock. Take 1 of an opponent's Flock from one of its neighbors and add it to the chosen city as yours.,A kind wind carries the curious to new temples.
 HAR-C-01,Famine,Calamity,Harvest,Cataclysmic,6,Target player gains no Flock income for their next 2 Economy Phases.,"The granaries are empty, and the faithful start asking whose fault it is."
 HAR-C-02,Blight,Calamity,Harvest,Cataclysmic,6,"Target city loses 2 Flock now, then 1 more at the start of each of its owner's next 3 turns.","It starts as a few black leaves, and then it's every field."
 HAR-C-03,Locust Swarm,Calamity,Harvest,Major,4,Target player loses 3 Flock from reserve. Anything they can't pay comes out of their cities.,"The sky goes dark at noon, and the sound never stops."
