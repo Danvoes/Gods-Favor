@@ -72,6 +72,12 @@ When your Flock in a city reaches its threshold, the city is not yours yet. It c
 
 You keep a converted city even if your Flock there falls below the threshold. But at the start of your turn, any city you control where your Flock is **below 25% of its population** becomes uncontrolled.
 
+When a city goes uncontrolled this way:
+
+- Its Holy Site drops one level (see Holy Sites).
+- Its structures stay as they are but benefit no one. Whoever converts the city next must pay 2 Flock per structure to turn each one on; there is no free wait.
+- Ongoing effects on it (Blight, Drought and similar) keep hitting the player they were cast on, on that player's own turns. If that player has no Flock left there, they do nothing.
+
 ### Income
 
 Your income is 1 base Flock a turn, plus 1 for each city you control (2 for a large city), +1 for each controlled city matching your domain, plus Holy Site bonuses.
@@ -167,7 +173,8 @@ Whenever anyone plays a Calamity of your domain, at anyone, you may pay its cost
 
 ### Special rules
 
-- **Counters.** Shelter of the Wild and Cure are counters. Play one at any time, even on another player's turn, right after a Calamity is announced (and after any redirect), before it resolves. All other cards, including Rationing and Repair Crews, are played on your own Action Phase.
+- **Counters.** Shelter of the Wild and Cure are counters. Play one at any time, even on another player's turn, right after a Calamity is announced (and after any redirect), before it resolves. A counter can't be played on a Calamity you are using to punish your own character. All other cards, including Rationing and Repair Crews, are played on your own Action Phase.
+- **Durations.** "Next turn" and "for N turns" always mean the affected player's own turns. For an effect on a city, that is the player the effect was cast on.
 - **Seeds.** A seed pays out at your next Economy Phase. It is lost if an opponent converts the city first, and a Harvest Calamity on that city destroys the seed instead of its usual effect.
 - **Ongoing effects.** Anything lasting more than one turn gets a marker on the city or player until it runs out.
 - **Structures.** A city holds at most 2. When the city changes hands, its structures stay but go Idle; the new owner waits one Economy Phase or pays 2 Flock to restore them.
@@ -199,7 +206,7 @@ Every character has three tiers of powers (`tier_1`, `tier_2`, `tier_3` in `data
 | Hero | On arrival | 2 Renown | 4 Renown |
 
 - **Prophets** count every city you have ever converted, so a Prophet never drops a tier.
-- **Heroes** count their current Renown. A Hero earns 1 Renown per battle won, and gains +1 to a stat of your choice on reaching each new tier. If Renown drops below a tier's requirement (for example, from Blood on Their Hands), the Hero loses that tier's power **and** its +1 stat until the tier is reached again. When it is regained, you choose the stat again.
+- **Heroes** count their current Renown. A Hero earns 1 Renown per battle won, and gains +1 to a stat of your choice on reaching each new tier. If Renown drops below a tier's requirement (for example, from Blood on Their Hands), the Hero loses that tier's power **and** its +1 stat until the tier is reached again. When it is regained, you choose the stat again. If both stats are already at 3 when a Hero reaches a tier, that tier's +1 is lost, and losing that tier later doesn't lower a stat.
 - **Distinct cities.** "Cities converted" counts each city once per game. Winning back a city you have converted before doesn't count again for Prophet tiers or strike resets.
 
 ### Free Will and strikes
@@ -207,12 +214,13 @@ Every character has three tiers of powers (`tier_1`, `tier_2`, `tier_3` in `data
 Free Will cards are events your Prophet or Hero causes. Each is a **Loss**, a **Roll** or a **Gain**.
 
 1. **Roll first.** For a Roll card, roll the die before deciding anything.
-2. **If the result is harmful** (it costs Flock or Renown, lowers a stat or army, or stops a character moving or fighting), you may discard any Favor card from your hand (free) to cancel the whole card, including any good parts of it (such as The Merchant's Gold's +2). Nothing else happens.
-3. **If you don't cancel it**, the card resolves, and you must also choose one:
+2. **If the result is not harmful** (a Gain card, or a "nothing" result on a Roll card), it simply resolves. No strike or punishment is owed.
+3. **If the result is harmful** (it costs Flock or Renown, lowers a stat or army, or stops a character moving or fighting), you may discard any Favor card from your hand (free) to cancel the whole card, including any good parts of it (such as The Merchant's Gold's +2). Nothing else happens.
+4. **If you don't cancel it**, the card resolves, and you must also choose one:
    - **Take a strike** on that character. This is always possible.
    - **Punish** your character by playing a Calamity from your hand against yourself, for free. Its effect resolves on you, and no strike is taken. If it is redirected, the redirect costs +2.
-4. **Where Flock comes from and goes.** Free Will losses come from the character's city; anything beyond what is there comes from reserve. Free Will gains go to the character's city.
-5. **Missing character.** A Free Will card for a character you no longer have is discarded with no effect.
+5. **Where Flock comes from and goes.** Free Will losses come from the character's city; anything beyond what is there comes from reserve. Free Will gains go to the character's city.
+6. **Missing character.** A Free Will card for a character you no longer have is discarded with no effect.
 
 **Strikes.** At 3 strikes, the character is removed. Strikes reset to 0 when you convert a new city, and are reduced by Healing Waters, Answered Prayer and Hero's Triumph. There is no other way to clear them.
 
@@ -234,7 +242,7 @@ A battle lets your Hero take Flock from a rival by force, at the cost of followe
    The lower roll loses 1 committed Flock for good; a tie costs both sides 1.
 4. **Retreat or press on.** After any round, the attacker may retreat. The surviving army goes to the attacker's reserve, the Hero returns to the city it marched from, and the Hero takes a strike. No spoils, no Renown.
 5. **Spoils.** The battle ends when one army is gone.
-   - **Attacker wins:** the surviving army and the Hero stay in the city, the attacker takes 2 more of the defender's Flock there, the defender's Hero (if it fought) takes a strike and falls back to a city its owner controls in the same region (owner's choice), or any controlled city if there is none in the region, and the attacking Hero earns 1 Renown.
+   - **Attacker wins:** the surviving army and the Hero stay in the city, the attacker takes 2 more of the defender's Flock there, the defender's Hero (if it fought) takes a strike and falls back to a city its owner controls in the same region (owner's choice), or any controlled city if there is none in the region. If its owner controls no cities, it falls back to any city where they still have Flock (owner's choice); if they have Flock nowhere, the Hero goes into exile off the board and returns in the owner's next converted city. The attacking Hero earns 1 Renown.
    - **Defender wins:** the defender's surviving Flock stay, they take 2 of the attacker's Flock in that city if there are any, the attacking Hero takes a strike and returns to the city it marched from, and the defending Hero (if it fought) earns 1 Renown.
 
 | Domain | Hero trait (Tier I) |

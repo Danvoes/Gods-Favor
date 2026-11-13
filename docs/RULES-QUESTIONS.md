@@ -4,17 +4,21 @@ Found while reading `docs/RULES.md` and the CSVs for the digital build. A comput
 
 ## Open
 
-1. **Whose "next turn"?** Many cards say "next turn" or "for 2 turns" without saying whose turn: Earthquake, Late Frost, Wild Beasts, Failed Harvest, Sabotage, Broken Roads, Stalled Caravan, The Long Fast, The King's Summons, A Challenge Refused. With 4 players, "next turn" could mean the very next player's turn, or the affected player's next turn.
-   **Proposed:** always the affected player's own next turn(s). For a city, that's the target player of the Calamity.
-2. **Structures and ongoing effects when a city goes uncontrolled.** Holy Sites now have a clear rule for this, but structures only say what happens "when the city changes hands". When a controller drops below 25% and the city goes uncontrolled, do its structures go Idle? And do ongoing city effects tied to "its owner" (Blight, Drought) keep hitting the former owner?
-   **Proposed:** structures go Idle, and ongoing effects stay tied to the Calamity's target player.
-3. **Free Will Gains and neutral rolls.** Step 3 ("take a strike or punish") follows "If you don't cancel it". Does it only apply to harmful results, so a Gain or a 3-4 "nothing" never costs a strike?
-   **Proposed:** yes, harmful results only.
-4. **A defeated defending Hero with nowhere to go.** It falls back to a city its owner controls. What if the owner controls no cities at that moment?
-5. **Hero tier stat at the cap.** On reaching a tier you choose +1 to a stat, max 3. If both stats are already 3 (e.g. from Armory), is the +1 simply lost?
-6. **Curing your own punishment.** Can you play Cure on a Calamity you're using to punish your own character? Then the Free Will loss still happens, but you avoid both the punishment and the strike, at the cost of 4 Flock and two cards.
+1. **Are switched-off structures "Idle"?** A city that went uncontrolled keeps structures that "benefit no one", and whoever converts it next must pay 2 Flock each to turn them on. Several cards work on "Idle" structures: Ada the Lamplighter Tier I (restore one for free), Ada Tier III (structures come online right away when you convert), and Repair Crews (restore one). Do these work on those switched-off structures too?
+   **Proposed:** yes. They count as Idle, but without the free one-Economy-Phase wait.
+2. **An exiled Hero.** While a Hero is in exile off the board, is it a "character you no longer have" (its Free Will cards are discarded with no effect, and Scandal can't target it)? Or does it still draw Free Will cards and take strikes, with no city to lose Flock from?
+   **Proposed:** treat it as missing until it returns.
 
 ## Answered
+
+### 4th rules update
+
+- "Next turn" and "for N turns" always mean the affected player's own turns.
+- When a city goes uncontrolled, its structures switch off until the next converter pays 2 Flock each, and ongoing effects keep hitting the player they were cast on.
+- Gains and "nothing" rolls never owe a strike or punishment.
+- A beaten defending Hero whose owner controls no cities falls back to a city with their Flock, or goes into exile.
+- A tier's +1 is lost if both stats are already at 3.
+- Counters can't be played on a punishment Calamity.
 
 ### 3rd rules update
 
