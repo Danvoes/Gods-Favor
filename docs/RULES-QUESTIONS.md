@@ -4,14 +4,16 @@ Found while reading `docs/RULES.md` and the CSVs for the digital build. A comput
 
 ## Open
 
-1. **Are switched-off structures "Idle"?** A city that went uncontrolled keeps structures that "benefit no one", and whoever converts it next must pay 2 Flock each to turn them on. Several cards work on "Idle" structures: Ada the Lamplighter Tier I (restore one for free), Ada Tier III (structures come online right away when you convert), and Repair Crews (restore one). Do these work on those switched-off structures too?
-   **Proposed:** yes. They count as Idle, but without the free one-Economy-Phase wait.
-2. **An exiled Hero.** While a Hero is in exile off the board, is it a "character you no longer have" (its Free Will cards are discarded with no effect, and Scandal can't target it)? Or does it still draw Free Will cards and take strikes, with no city to lose Flock from?
+1. **An exiled Hero.** While a Hero is in exile off the board, is it a "character you no longer have" (its Free Will cards are discarded with no effect, and Scandal can't target it)? Or does it still draw Free Will cards and take strikes, with no city to lose Flock from?
    **Proposed:** treat it as missing until it returns.
-3. **Can two players pick the same domain?** Setup says each player "picks a god and its domain" but not whether domains must be different. Each domain has 2 Prophets and 2 Heroes, so two players could share one, but domain-matched cities and redirects would be contested.
+2. **Can two players pick the same domain?** Setup says each player "picks a god and its domain" but not whether domains must be different. Each domain has 2 Prophets and 2 Heroes, so two players could share one, but domain-matched cities and redirects would be contested.
    **For now:** the game requires different domains. This is one setting (`allowSharedDomains` in `src/game/rules.ts`), so changing it is quick.
 
 ## Answered
+
+### Designer rulings (not yet in RULES.md)
+
+- **Switched-off structures are not "Idle".** Structures in a city that went uncontrolled can only be turned on by the next converter paying 2 Flock each. Ada the Lamplighter (Tier I and Tier III) and Repair Crews don't work on them; they only affect Idle structures from a city that changed hands directly.
 
 ### 4th rules update
 
