@@ -9,6 +9,12 @@ const REGIONS = ["A", "B", "C"] as const;
 
 const shortDomain = (d: string) => d.split("/")[0];
 
+const STATUS_HELP = {
+  on: "Working",
+  idle: "Idle: the city changed hands. Works again after the controller's next Economy Phase, or now for 2 Flock.",
+  off: "Switched off: the city went uncontrolled. The controller must pay 2 Flock to turn it on.",
+};
+
 interface BoardProps {
   data: GameData;
   /** Omit to show an empty map (used while picking a starting city). */
@@ -58,6 +64,18 @@ function CityCard({ data, city, state, pickFor }: { data: GameData; city: City; 
         {city.need && <> ({city.convertAtMatched} for {shortDomain(city.need)})</>}
       </p>
       <p className="city-control">{controller ? `Controlled by ${controller.name}` : "Uncontrolled"}</p>
+      {cityState && (cityState.structures.length > 0 || cityState.ruin > 0 || cityState.holySite) && (
+        <ul className="city-tokens" aria-label={`On ${city.name}`}>
+          {cityState.holySite && <li className="token holy">{cityState.holySite}</li>}
+          {cityState.structures.map((st, i) => (
+            <li key={i} className={`token structure ${st.status}`} title={STATUS_HELP[st.status]}>
+              {st.kind}
+              {st.status !== "on" && ` (${st.status === "idle" ? "Idle" : "off"})`}
+            </li>
+          ))}
+          {cityState.ruin > 0 && <li className="token ruin">Ruin{cityState.ruin > 1 ? ` ×${cityState.ruin}` : ""}</li>}
+        </ul>
+      )}
 
       {state && cityState && (
         <ul className="flock-list">

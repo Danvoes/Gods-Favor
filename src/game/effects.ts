@@ -15,8 +15,9 @@
 
 import type { Card, DivineCard, GameData } from "../data/types";
 import { randomInt } from "./random";
-import { REGIONS, citiesInRegion, cityState, flockIn, neighborsOf, placeableCities, playerById } from "./rules";
-import type { GameState, PlayerState } from "./types";
+import { REGIONS, citiesInRegion, cityInfo, cityState, flockIn, neighborsOf, placeableCities, playerById } from "./rules";
+import { RULES, workingStructures } from "./rules";
+import { STRUCTURE_CARDS, type GameState, type PlayerState, type StructureKind } from "./types";
 
 export interface Option {
   value: string;
@@ -42,12 +43,21 @@ export interface TargetSpec {
   /** Shown if there are no valid choices, which means the card can't be cast right now. */
   noneReason: string;
   options: (ctx: EffectContext, chosen: Targets) => Option[];
+  /** Skipped when there's nothing to choose (e.g. "Which structure?" in a city with none). */
+  optional?: boolean;
 }
 
 export interface Playable {
   text: string;
-  targets: TargetSpec[];
+  /** The questions, or a function giving them from the answers so far (when later questions depend on earlier ones). */
+  targets: TargetSpec[] | ((ctx: EffectContext, chosen: Targets) => TargetSpec[]);
   resolve: (ctx: EffectContext, t: Targets) => void;
+  /** Counters are only played in response to a Calamity, not as an action. */
+  counter?: boolean;
+}
+
+export function specsFor(effect: Playable, ctx: EffectContext, chosen: Targets): TargetSpec[] {
+  return typeof effect.targets === "function" ? effect.targets(ctx, chosen) : effect.targets;
 }
 
 export interface NotYet {
@@ -81,11 +91,77 @@ function loseFlock(ctx: EffectContext, city: string, playerId: string, n: number
   return lost;
 }
 
-/** A Calamity hitting a city: removes the target player's Flock and remembers the hit. */
+/**
+ * A Calamity hitting a city: removes the target player's Flock and remembers
+ * the hit. Each working City Walls there means 1 less Flock lost.
+ */
 function hit(ctx: EffectContext, city: string, playerId: string, n: number) {
   const phase = ctx.state.phase;
   if (phase.name === "turn" && !phase.calamityHits.includes(city)) phase.calamityHits.push(city);
-  loseFlock(ctx, city, playerId, n);
+  const walls = workingStructures(cityState(ctx.state, city), "City Walls");
+  if (walls > 0 && n > 0) ctx.report(`${city}'s City Walls soften the blow by ${Math.min(walls, n)}.`);
+  loseFlock(ctx, city, playerId, Math.max(0, n - walls));
+}
+
+// --------------------------------------------------------------- structures
+
+const structureLabel = (kind: string, status: string) => (status === "on" ? kind : `${kind} (${status})`);
+
+function build(ctx: EffectContext, city: string, kind: StructureKind) {
+  const c = cityState(ctx.state, city);
+  c.structures.push({ kind, status: "on" });
+  ctx.report(`${ctx.caster.name} builds a ${kind} in ${city}.`);
+}
+
+function destroyStructure(ctx: EffectContext, city: string, index: number) {
+  const c = cityState(ctx.state, city);
+  const [gone] = c.structures.splice(index, 1);
+  ctx.state.destroyed.push({ city, kind: gone.kind, turn: ctx.state.turnCount });
+  ctx.report(`${city}'s ${gone.kind} is destroyed.`);
+}
+
+/** "Build:" cards go in a city you control with a free structure slot. */
+const buildCity: TargetSpec = {
+  key: "city",
+  question: "Build in which city you control?",
+  noneReason: "You need to control a city with a free structure slot (at most 2 per city).",
+  options: (ctx) =>
+    ctx.state.cities
+      .filter((c) => c.controller === ctx.caster.id && c.structures.length < RULES.maxStructuresPerCity)
+      .map((c) => ({ value: c.name, label: `${c.name} (${c.structures.length}/2 structures)` })),
+};
+
+function structureCard(cardId: keyof typeof STRUCTURE_CARDS, text: string, extra?: (ctx: EffectContext, t: Targets) => void): Playable {
+  return {
+    text,
+    targets: [buildCity],
+    resolve: (ctx, t) => {
+      build(ctx, t.city, STRUCTURE_CARDS[cardId]);
+      extra?.(ctx, t);
+    },
+  };
+}
+
+/** "Which structure?" in the chosen city. Skipped if it has none. */
+const whichStructure: TargetSpec = {
+  key: "structure",
+  question: "Which structure?",
+  noneReason: "",
+  optional: true,
+  options: (ctx, t) =>
+    cityState(ctx.state, t.city).structures.map((st, i) => ({ value: String(i), label: structureLabel(st.kind, st.status) })),
+};
+
+function nextCardCost(text: string, who: "target" | "self", amount: number): Playable {
+  return {
+    text,
+    targets: who === "target" ? [targetPlayer] : [],
+    resolve: (ctx, t) => {
+      const p = who === "target" ? playerById(ctx.state, t.player) : ctx.caster;
+      p.nextCardCost += amount;
+      ctx.report(`${p.name}'s next card costs ${Math.abs(amount)} ${amount > 0 ? "more" : "less"}.`);
+    },
+  };
 }
 
 function gainFlock(ctx: EffectContext, city: string, n: number) {
@@ -402,25 +478,115 @@ export const EFFECTS: Record<string, CardEffect> = {
   "HAR-F-09": later4b("plants a seed"),
 
   // Production Calamities: permanence
-  "PRO-C-01": later4b("leaves a Ruin token"),
-  "PRO-C-02": later4b("destroys structures"),
-  "PRO-C-03": later4b("changes card costs"),
+  "PRO-C-01": {
+    text: "Target city loses 4 Flock and gets a Ruin token, which cuts its income by 1 until cleared.",
+    targets: [targetPlayer, calamityCity],
+    resolve: (ctx, t) => {
+      hit(ctx, t.city, t.player, 4);
+      cityState(ctx.state, t.city).ruin += 1;
+      ctx.report(`${t.city} gets a Ruin token (-1 income until cleared).`);
+    },
+  },
+  "PRO-C-02": {
+    text: "Destroy every structure in the target region, and each city there loses 1 Flock.",
+    targets: [targetPlayer, anyRegion],
+    resolve: (ctx, t) => {
+      for (const city of citiesInRegion(ctx.data, t.region)) {
+        const c = cityState(ctx.state, city);
+        while (c.structures.length > 0) destroyStructure(ctx, city, 0);
+        hit(ctx, city, t.player, 1);
+      }
+    },
+  },
+  "PRO-C-03": later4b("lasts 2 turns (an ongoing effect)"),
   "PRO-C-04": later4b("locks a Prophet (Prophets arrive in milestone 5)"),
-  "PRO-C-05": later4b("destroys a structure"),
-  "PRO-C-06": later4b("destroys a structure"),
-  "PRO-C-07": later4b("changes card costs"),
-  "PRO-C-08": later4b("changes card costs"),
+  "PRO-C-05": {
+    text: "Target city loses 3 Flock, and one structure there is destroyed.",
+    targets: [targetPlayer, calamityCity, whichStructure],
+    resolve: (ctx, t) => {
+      hit(ctx, t.city, t.player, 3);
+      if (t.structure !== undefined) destroyStructure(ctx, t.city, Number(t.structure));
+    },
+  },
+  "PRO-C-06": {
+    text: "Destroy one structure in the target city. If it has none, the city loses 2 Flock instead.",
+    targets: [targetPlayer, calamityCity, whichStructure],
+    resolve: (ctx, t) => {
+      if (t.structure !== undefined) destroyStructure(ctx, t.city, Number(t.structure));
+      else hit(ctx, t.city, t.player, 2);
+    },
+  },
+  "PRO-C-07": nextCardCost("Target player's next card costs 2 more.", "target", 2),
+  "PRO-C-08": nextCardCost("Target player's next card costs 1 more.", "target", 1),
   "PRO-C-09": later4b("locks a Prophet (Prophets arrive in milestone 5)"),
 
   // Production Favors: permanence
-  "PRO-F-01": later4b("builds a structure"),
-  "PRO-F-02": later4b("builds a structure"),
-  "PRO-F-03": later4b("builds a structure"),
-  "PRO-F-04": later4b("builds a structure"),
-  "PRO-F-05": later4b("repairs structures"),
-  "PRO-F-06": later4b("builds a structure"),
-  "PRO-F-07": later4b("builds a structure"),
-  "PRO-F-08": later4b("changes card costs"),
+  "PRO-F-01": structureCard("PRO-F-01", "Build: this city gives +2 income every turn."),
+  "PRO-F-02": structureCard(
+    "PRO-F-02",
+    "Build, linked to the city's region: your Prophet moves between cities in that region for free, and each city you control there gains 1 Flock now.",
+    (ctx, t) => {
+      ctx.report("(Free Prophet moves start working when Prophets arrive in milestone 5.)");
+      const region = cityInfo(ctx.data, t.city).region;
+      citiesInRegion(ctx.data, region)
+        .filter((c) => cityState(ctx.state, c).controller === ctx.caster.id)
+        .forEach((c) => gainFlock(ctx, c, 1));
+    },
+  ),
+  "PRO-F-03": structureCard("PRO-F-03", "Build: your cards cost 1 less while you control this city (maximum -2 from Workshops)."),
+  "PRO-F-04": structureCard("PRO-F-04", "Build: Calamities against this city cost the caster 2 more, and the city loses 1 less Flock from each."),
+  "PRO-F-05": {
+    text: "Remove a Ruin token, restore an Idle structure, or rebuild one destroyed since your last turn, then gain 1 Flock there.",
+    targets: [
+      {
+        key: "repair",
+        question: "What do you repair?",
+        noneReason: "There's no Ruin token, Idle structure or recently destroyed structure in a city you can target.",
+        options: (ctx) => {
+          const opts: Option[] = [];
+          for (const city of placeableCities(ctx.state, ctx.caster.id)) {
+            const c = cityState(ctx.state, city);
+            if (c.ruin > 0) opts.push({ value: `ruin@${city}`, label: `Remove a Ruin token in ${city}` });
+            // Only Idle structures: switched-off ones (city went uncontrolled) can't be repaired.
+            c.structures.forEach((st, i) => {
+              if (st.status === "idle") opts.push({ value: `restore@${city}@${i}`, label: `Restore the Idle ${st.kind} in ${city}` });
+            });
+            if (c.structures.length < RULES.maxStructuresPerCity) {
+              ctx.state.destroyed.forEach((d, i) => {
+                if (d.city === city && d.turn > ctx.caster.previousTurn) {
+                  opts.push({ value: `rebuild@${city}@${i}`, label: `Rebuild the ${d.kind} in ${city}` });
+                }
+              });
+            }
+          }
+          return opts;
+        },
+      },
+    ],
+    resolve: (ctx, t) => {
+      const [kind, city, n] = t.repair.split("@");
+      const c = cityState(ctx.state, city);
+      if (kind === "ruin") {
+        c.ruin -= 1;
+        ctx.report(`A Ruin token is cleared from ${city}.`);
+      } else if (kind === "restore") {
+        c.structures[Number(n)].status = "on";
+        ctx.report(`${city}'s ${c.structures[Number(n)].kind} is working again.`);
+      } else {
+        const [d] = ctx.state.destroyed.splice(Number(n), 1);
+        c.structures.push({ kind: d.kind, status: c.controller ? "on" : "off" });
+        ctx.report(`${city}'s ${d.kind} is rebuilt.`);
+      }
+      gainFlock(ctx, city, 1);
+    },
+  },
+  "PRO-F-06": structureCard("PRO-F-06", "Build: this city gives +1 income."),
+  "PRO-F-07": structureCard(
+    "PRO-F-07",
+    "Build: moving your Prophet into or out of this city always costs 1 Flock, ignoring the domain wheel.",
+    (ctx) => ctx.report("(Its effect on Prophet moves starts working when Prophets arrive in milestone 5.)"),
+  ),
+  "PRO-F-08": nextCardCost("Your next card costs 2 less.", "self", -2),
   "PRO-F-09": later5("moves your Prophet"),
 
   // Health Calamities: the graveyard

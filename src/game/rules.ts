@@ -1,7 +1,7 @@
 // Small rule calculations shared by the engine and the screens.
 
 import type { City, Domain, GameData, HolySiteLevel } from "../data/types";
-import type { CityState, GameState, PlayerId, PlayerState } from "./types";
+import type { CityState, GameState, PlayerId, PlayerState, StructureKind } from "./types";
 
 /** Every rule number in one place, so a rules change is a one-line edit. */
 export const RULES = {
@@ -23,6 +23,12 @@ export const RULES = {
   citiesToControlRegion: 2,
   /** You win by holding this many regions from the end of one turn to the start of your next. */
   regionsToWin: 2,
+  maxStructuresPerCity: 2,
+  /** "Your cards cost 1 less while you control this city (maximum -2 from Workshops)." */
+  maxWorkshopDiscount: 2,
+  /** Cost to turn on an Idle or switched-off structure. */
+  restoreStructureCost: 2,
+  structureIncome: { "Grand Foundry": 2, Market: 1 } as Partial<Record<StructureKind, number>>,
 };
 
 /** Thrown when someone tries something the rules don't allow. The message is shown to players. */
@@ -132,13 +138,30 @@ export function incomeBreakdown(data: GameData, state: GameState, playerId: Play
   const lines: IncomeLine[] = [{ label: "Base income", amount: RULES.baseIncome }];
   for (const city of citiesControlledBy(state, playerId)) {
     const info = cityInfo(data, city.name);
-    lines.push({ label: `${city.name} (${info.size.toLowerCase()} city)`, amount: info.income });
-    if (info.need === domain) lines.push({ label: `${city.name} matches your domain`, amount: RULES.domainMatchIncome });
-    if (city.holySite) lines.push({ label: `${city.name} ${city.holySite}`, amount: RULES.holySiteIncome[city.holySite] });
+    const cityLines: IncomeLine[] = [{ label: `${city.name} (${info.size.toLowerCase()} city)`, amount: info.income }];
+    if (info.need === domain) cityLines.push({ label: `${city.name} matches your domain`, amount: RULES.domainMatchIncome });
+    if (city.holySite) cityLines.push({ label: `${city.name} ${city.holySite}`, amount: RULES.holySiteIncome[city.holySite] });
+    for (const st of city.structures) {
+      const extra = RULES.structureIncome[st.kind];
+      if (extra && st.status === "on") cityLines.push({ label: `${city.name} ${st.kind}`, amount: extra });
+    }
+    if (city.ruin > 0) {
+      // Ruin cuts the city's income, but a city never gives less than nothing.
+      const before = cityLines.reduce((a, l) => a + l.amount, 0);
+      const cut = Math.min(before, city.ruin);
+      cityLines.push({ label: `${city.name} Ruin`, amount: -cut });
+    }
+    lines.push(...cityLines);
   }
   return lines;
 }
 
 export function totalIncome(data: GameData, state: GameState, playerId: PlayerId): number {
   return incomeBreakdown(data, state, playerId).reduce((sum, line) => sum + line.amount, 0);
+}
+
+/** How many working structures of a kind a city has. Structures only work in a controlled city. */
+export function workingStructures(city: CityState, kind: StructureKind): number {
+  if (city.controller === null) return 0;
+  return city.structures.filter((s) => s.kind === kind && s.status === "on").length;
 }

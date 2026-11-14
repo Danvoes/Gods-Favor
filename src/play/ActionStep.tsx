@@ -5,8 +5,10 @@ import { useState } from "react";
 import type { DivineCard, GameData } from "../data/types";
 import { CardFace } from "../components/Faces";
 import { canCast, castingQuestions } from "../game/cast";
-import { cityState, flockIn, playerById } from "../game/rules";
+import { cardCost } from "../game/costs";
+import { playerById } from "../game/rules";
 import type { Action, GameState, PlayerState } from "../game/types";
+import { PaymentPicker, shortfallOf, sumOf } from "./Payment";
 
 interface Props {
   data: GameData;
@@ -37,6 +39,9 @@ export function ActionStep({ data, game, player, act }: Props) {
               {castable.ok ? (
                 <button type="button" className="button primary cast-button" onClick={() => setPicked(id)}>
                   Cast {card.name}
+                  {card.kind === "divine" && cardCost(data, game, player.id, card).total !== card.cost
+                    ? ` (now costs ${cardCost(data, game, player.id, card).total})`
+                    : ""}
                 </button>
               ) : (
                 <p className="not-castable">{castable.reason}</p>
@@ -71,17 +76,9 @@ function CastPanel({ data, game, player, cardId, act, onCancel }: Props & { card
     setTargets({ ...kept, [key]: value });
   };
 
-  const fromReserve = Math.min(player.reserve, card.cost);
-  const shortfall = card.cost - fromReserve;
-  const paying = Object.values(payFrom).reduce((a, b) => a + b, 0);
-  const payCities = game.cities.filter((c) => flockIn(c, player.id) > 0).map((c) => c.name);
-  const changePay = (city: string, by: number) =>
-    setPayFrom((p) => {
-      const have = flockIn(cityState(game, city), player.id);
-      return { ...p, [city]: Math.min(have, Math.max(0, (p[city] ?? 0) + by)) };
-    });
-
-  const ready = allAnswered && paying === shortfall;
+  const { total: cost, lines: costLines } = cardCost(data, game, player.id, card, targets);
+  const shortfall = shortfallOf(player, cost);
+  const ready = allAnswered && sumOf(payFrom) === shortfall;
   const targetName = targets.player ? playerById(game, targets.player).name : null;
 
   return (
@@ -113,41 +110,7 @@ function CastPanel({ data, game, player, cardId, act, onCancel }: Props & { card
             </fieldset>
           ))}
 
-          <fieldset className="question">
-            <legend>Pay {card.cost} Flock</legend>
-            {shortfall === 0 ? (
-              <p className="muted small">All {card.cost} from reserve (you have {player.reserve}).</p>
-            ) : (
-              <>
-                <p className="muted small">
-                  {fromReserve > 0 ? `${fromReserve} from reserve, ` : "Your reserve is empty, so "}
-                  choose where the other {shortfall} come from ({paying} chosen).
-                </p>
-                <ul className="placement-list">
-                  {payCities.map((city) => {
-                    const n = payFrom[city] ?? 0;
-                    return (
-                      <li key={city} className="placement-row">
-                        <span className="placement-city">
-                          <strong>{city}</strong>
-                          <span className="muted small">you have {flockIn(cityState(game, city), player.id)}</span>
-                        </span>
-                        <span className="stepper">
-                          <button type="button" className="step-btn" aria-label={`Pay one fewer from ${city}`} disabled={n === 0} onClick={() => changePay(city, -1)}>
-                            −
-                          </button>
-                          <output className="step-value">{n}</output>
-                          <button type="button" className="step-btn" aria-label={`Pay one more from ${city}`} disabled={paying >= shortfall} onClick={() => changePay(city, 1)}>
-                            +
-                          </button>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </>
-            )}
-          </fieldset>
+          <PaymentPicker game={game} player={player} cost={cost} lines={costLines} payFrom={payFrom} setPayFrom={setPayFrom} />
 
           <div className="form-actions">
             <button type="button" className="button" onClick={onCancel}>

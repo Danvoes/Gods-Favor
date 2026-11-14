@@ -16,7 +16,9 @@ import {
 } from "../game/rules";
 import type { Action, GameState, PlayerState, TurnStep } from "../game/types";
 import { Board } from "./Board";
+import { totalFlock } from "../game/costs";
 import { ActionStep, EndStep } from "./ActionStep";
+import { PaymentPicker, shortfallOf, sumOf } from "./Payment";
 import { DrawButtons, HandView } from "./SetupSteps";
 
 type TurnPhase = Extract<GameState["phase"], { name: "turn" }>;
@@ -43,6 +45,9 @@ export function TurnView({ data, game, act }: TurnProps) {
         {phase.step === "economy" && <EconomyStep data={data} player={player} game={game} act={act} />}
         {phase.step === "action" && <ActionStep data={data} game={game} player={player} act={act} />}
         {phase.step === "end" && <EndStep player={player} act={act} />}
+        {(phase.step === "economy" || phase.step === "action" || phase.step === "end") && (
+          <StructuresToRestore game={game} player={player} act={act} />
+        )}
       </section>
       <div className="table-layout">
         <Board data={data} state={game} />
@@ -191,6 +196,68 @@ function EconomyStep({ data, player, game, act }: StepProps) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Idle or switched-off structures in your cities, with a button to pay 2 Flock to turn each on. */
+function StructuresToRestore({ game, player, act }: { game: GameState; player: PlayerState; act: TurnProps["act"] }) {
+  const [paying, setPaying] = useState<{ city: string; index: number } | null>(null);
+  const [payFrom, setPayFrom] = useState<Record<string, number>>({});
+  const list = game.cities
+    .filter((c) => c.controller === player.id)
+    .flatMap((c) => c.structures.map((st, index) => ({ city: c.name, index, st })).filter((x) => x.st.status !== "on"));
+  if (list.length === 0) return null;
+  const cost = RULES.restoreStructureCost;
+  const canAfford = totalFlock(game, player.id) >= cost;
+  const restore = (city: string, index: number, from?: Record<string, number>) => {
+    act({ type: "restoreStructure", playerId: player.id, city, index, payFrom: from });
+    setPaying(null);
+    setPayFrom({});
+  };
+  return (
+    <div className="step restore">
+      <h4 className="small-heading">Structures not working</h4>
+      <ul className="placement-list">
+        {list.map(({ city, index, st }) => (
+          <li key={`${city}-${index}`} className="placement-row">
+            <span className="placement-city">
+              <strong>
+                {st.kind} in {city}
+              </strong>
+              <span className="muted small">
+                {st.status === "idle" ? "Idle: works again after your next Economy Phase" : "Switched off: only paying turns it on"}
+              </span>
+            </span>
+            <button
+              type="button"
+              className="button"
+              disabled={!canAfford}
+              onClick={() => (shortfallOf(player, cost) === 0 ? restore(city, index) : setPaying({ city, index }))}
+            >
+              Turn on for {cost} Flock
+            </button>
+          </li>
+        ))}
+      </ul>
+      {paying && (
+        <>
+          <PaymentPicker game={game} player={player} cost={cost} payFrom={payFrom} setPayFrom={setPayFrom} />
+          <div className="form-actions">
+            <button type="button" className="button" onClick={() => setPaying(null)}>
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="button primary"
+              disabled={sumOf(payFrom) !== shortfallOf(player, cost)}
+              onClick={() => restore(paying.city, paying.index, payFrom)}
+            >
+              Pay and turn on
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

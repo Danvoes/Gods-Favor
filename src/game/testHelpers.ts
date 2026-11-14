@@ -2,7 +2,8 @@
 
 import { loadGameData } from "../data";
 import { applyAction, createGame } from "./engine";
-import { RULES, cityState } from "./rules";
+import { expect } from "vitest";
+import { RULES, cityState, playerById } from "./rules";
 import type { Action, GameState, PlayerId } from "./types";
 
 export const data = loadGameData();
@@ -58,4 +59,26 @@ export function passTurn(g: GameState): GameState {
 
 export const step = (g: GameState) => (g.phase.name === "turn" ? g.phase.step : g.phase.name);
 export const current = (g: GameState) => (g.phase.name === "turn" ? g.phase.player : null);
+
+
+/**
+ * Ana's Action step, holding exactly `hand`, with `reserve` Flock in reserve.
+ * Board: Ana 10 in Ashgrove, Ben 10 in Goldmere, Cy 10 in Brightwell.
+ */
+export function anaToAct(hand: string[], reserve = 6, change: (g: GameState) => void = () => {}): GameState {
+  let g = act(newGame(), { type: "placeFlock", playerId: "p1", placements: {} });
+  g = tweak(g, (g) => {
+    const ana = playerById(g, "p1");
+    ana.hand = [...hand];
+    ana.reserve = reserve;
+    change(g);
+  });
+  expect(step(g)).toBe("action");
+  return g;
+}
+
+export const cast = (g: GameState, cardId: string, targets: Record<string, string> = {}, payFrom?: Record<string, number>) =>
+  act(g, { type: "castCard", playerId: "p1", cardId, targets, payFrom });
+
+export const flock = (g: GameState, city: string) => cityState(g, city).flock;
 

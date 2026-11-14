@@ -9,6 +9,7 @@ import type { GameData } from "../data/types";
 import { RuleError } from "./rules";
 import { castCard } from "./cast";
 import { chooseStartingCity, drawStartingCard } from "./setup";
+import { restoreStructure } from "./structures";
 import { drawForTurn, endTurn, placeFlock } from "./turn";
 import type { Action, GameState } from "./types";
 
@@ -30,6 +31,9 @@ export function applyAction(data: GameData, state: GameState, action: Action): G
       break;
     case "endTurn":
       endTurn(data, next, action.playerId);
+      break;
+    case "restoreStructure":
+      restoreStructure(data, next, action.playerId, action.city, action.index, action.payFrom);
       break;
     case "castCard":
       castCard(data, next, action.playerId, action.cardId, action.targets, action.payFrom);

@@ -1,30 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { canCast, castingQuestions } from "./cast";
 import { EFFECTS, isPlayable } from "./effects";
-import { cityState, playerById } from "./rules";
-import { act, data, newGame, passTurn, setFlock, step, tweak } from "./testHelpers";
-import type { GameState } from "./types";
-
-/**
- * Ana's Action step, holding exactly `hand`, with `reserve` Flock in reserve.
- * Board: Ana 10 in Ashgrove, Ben 10 in Goldmere, Cy 10 in Brightwell.
- */
-function anaToAct(hand: string[], reserve = 6, change: (g: GameState) => void = () => {}): GameState {
-  let g = act(newGame(), { type: "placeFlock", playerId: "p1", placements: {} });
-  g = tweak(g, (g) => {
-    const ana = playerById(g, "p1");
-    ana.hand = [...hand];
-    ana.reserve = reserve;
-    change(g);
-  });
-  expect(step(g)).toBe("action");
-  return g;
-}
-
-const cast = (g: GameState, cardId: string, targets: Record<string, string> = {}, payFrom?: Record<string, number>) =>
-  act(g, { type: "castCard", playerId: "p1", cardId, targets, payFrom });
-
-const flock = (g: GameState, city: string) => cityState(g, city).flock;
+import { playerById } from "./rules";
+import { act, anaToAct, cast, data, flock, newGame, passTurn, setFlock, step } from "./testHelpers";
 
 describe("every card is accounted for", () => {
   it("has an entry for each Calamity and Favor in cards.csv", () => {
@@ -39,9 +17,13 @@ describe("every card is accounted for", () => {
     expect(isPlayable(effect) && effect.text).toBe(card.effect);
   });
 
-  it("can play about half the deck in milestone 4a", () => {
-    const playable = Object.values(EFFECTS).filter(isPlayable).length;
-    expect(playable).toBe(49);
+  it("every card that isn't playable yet says which milestone brings it and why", () => {
+    for (const effect of Object.values(EFFECTS)) {
+      if (!isPlayable(effect)) {
+        expect(["4b", "milestone 5"]).toContain(effect.later);
+        expect(effect.why.length).toBeGreaterThan(5);
+      }
+    }
   });
 });
 
@@ -284,5 +266,12 @@ describe("Favors", () => {
     const g = cast(anaToAct(["NEU-F-14"], 2), "NEU-F-14", { city: "Ashgrove" });
     expect(flock(g, "Ashgrove")).toEqual({ p1: 11 });
     expect(playerById(g, "p1").reserve).toBe(1);
+  });
+});
+
+describe("offering only cards that can be finished", () => {
+  it("doesn't offer Tailwind when no opponent is next to any of your cities", () => {
+    const g = anaToAct(["NAT-F-09"]);
+    expect(canCast(data, g, "p1", "NAT-F-09")).toEqual({ ok: false, reason: "No opponent has Flock in a neighboring city." });
   });
 });

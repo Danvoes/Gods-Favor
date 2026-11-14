@@ -29,9 +29,19 @@ export function createGame(data: GameData, newPlayers: NewPlayer[], seed: number
       hand: [],
       convertedCities: [],
       holdingRegions: false,
+      nextCardCost: 0,
+      lastTurn: 0,
+      previousTurn: 0,
     })),
     turnOrder: [],
-    cities: data.cities.map((c) => ({ name: c.name, flock: {}, controller: null, holySite: null })),
+    cities: data.cities.map((c) => ({
+      name: c.name,
+      flock: {},
+      controller: null,
+      holySite: null,
+      structures: [],
+      ruin: 0,
+    })),
     startingCities: {},
     decks: {
       Calamity: data.cards.filter((c) => c.deck === "Calamity").map((c) => c.id),
@@ -41,6 +51,8 @@ export function createGame(data: GameData, newPlayers: NewPlayer[], seed: number
     discards: { Calamity: [], Favor: [], "Free Will": [] },
     phase: { name: "chooseStartingCities", choices: {} },
     log: [],
+    turnCount: 0,
+    destroyed: [],
   };
 
   shuffle(state, state.decks.Calamity);

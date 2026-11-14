@@ -17,6 +17,15 @@ Found while reading `docs/RULES.md` and the CSVs for the digital build. A comput
 7. **Casting a card with no valid target.** Can you cast a card that would do nothing, for example Second Life with no cheap Favor in the discard pile, or Golden Age while controlling one city, just to get it out of your hand?
    **For now:** a card needs a valid choice for each question to be cast. A Calamity at a player with no Flock in the chosen city is still allowed (the rulebook says "that part does nothing").
 
+### Structures and costs (milestone 4b). Proposed, and used for now
+
+8. **Where can you build?** "Build:" cards don't say. **Used:** only in a city you control, with a free slot (2 at most).
+9. **City Walls.** **Used:** +2 cost only when the walled city is the Calamity's main target. "1 less Flock" applies to every Calamity hit on the city, including spread from a neighbor, but only to Flock in the city (not reserve losses). Two City Walls in one city count twice (+4 cost, 2 less).
+10. **"Waits one Economy Phase."** **Used:** Idle structures turn on at the end of the new controller's first Economy Phase after conversion. Conversion happens at Start, so that's the same turn: no income from them that turn, working from the Action on.
+11. **Paying 2 to restore a structure** isn't an action. **Used:** allowed any time during your own turn after drawing.
+12. **Repair Crews "since your last turn".** **Used:** structures destroyed after your previous turn, including during the current one. A structure rebuilt in an uncontrolled city starts switched off.
+13. **Costs and Ruin can't go negative.** **Used:** a card never costs less than 0, and Ruin can't make a city give less than 0 income.
+
 ## Answered
 
 ### Designer rulings (not yet in RULES.md)

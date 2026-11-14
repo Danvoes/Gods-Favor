@@ -28,6 +28,9 @@ import type { CityState, DrawDeck, GameState, PlayerId, TurnStep } from "./types
 /** Starts a player's turn: runs the Start phase, then any phases needing no decision. */
 export function beginTurn(data: GameData, state: GameState, playerId: PlayerId, round: number) {
   const player = playerById(state, playerId);
+  state.turnCount += 1;
+  player.previousTurn = player.lastTurn;
+  player.lastTurn = state.turnCount;
   state.log.push(`Round ${round}: ${player.name}'s turn.`);
   state.phase = {
     name: "turn",
@@ -57,6 +60,7 @@ function startPhase(data: GameData, state: GameState, playerId: PlayerId): boole
         `${player.name} has only ${flockIn(city, playerId)} Flock in ${city.name} (needs ${loseBelow} to keep it), so it becomes uncontrolled.`,
       );
       desecrate(state, city);
+      switchOffStructures(state, city);
     }
   }
 
@@ -98,9 +102,15 @@ function convert(state: GameState, city: CityState, playerId: PlayerId, threshol
     : "";
   state.log.push(`${city.name} converts to ${player.name} (${own} Flock, needed ${threshold}).${switchText}`);
 
-  // A city taken from a rival loses a Holy Site level. Converting an
-  // uncontrolled city doesn't: it already dropped when it was lost.
-  if (previous !== null) desecrate(state, city);
+  // A city taken from a rival loses a Holy Site level and its structures go
+  // Idle. Converting an uncontrolled city doesn't drop the Holy Site again,
+  // and its structures stay switched off until paid for.
+  if (previous !== null) {
+    desecrate(state, city);
+    idleStructures(state, city);
+  } else if (city.structures.length > 0) {
+    state.log.push(`${city.name}'s structures stay switched off until ${player.name} pays 2 Flock for each.`);
+  }
 
   // "Cities converted" counts each city once per game.
   if (!player.convertedCities.includes(city.name)) {
@@ -109,6 +119,24 @@ function convert(state: GameState, city: CityState, playerId: PlayerId, threshol
       state.log.push(`This is ${player.name}'s first city. (Prophets and Heroes arrive in a later milestone.)`);
     }
   }
+}
+
+/** "When the city changes hands, its structures stay but go Idle." */
+function idleStructures(state: GameState, city: CityState) {
+  const working = city.structures.filter((s) => s.status === "on");
+  working.forEach((s) => (s.status = "idle"));
+  if (working.length > 0) {
+    state.log.push(
+      `${city.name}'s ${working.map((s) => s.kind).join(" and ")} ${working.length > 1 ? "go" : "goes"} Idle: on after one Economy Phase, or now for 2 Flock each.`,
+    );
+  }
+}
+
+/** A city that goes uncontrolled: "Its structures stay as they are but benefit no one." */
+function switchOffStructures(state: GameState, city: CityState) {
+  if (city.structures.length === 0) return;
+  city.structures.forEach((s) => (s.status = "off"));
+  state.log.push(`${city.name}'s structures switch off. Whoever converts it next must pay 2 Flock each to turn them on.`);
 }
 
 /** "Its Holy Site is desecrated and drops one level." */
@@ -219,7 +247,13 @@ export function placeFlock(data: GameData, state: GameState, playerId: PlayerId,
       ? `${player.name} keeps all ${player.reserve} Flock in reserve.`
       : `${player.name} places ${where}. ${player.reserve} stay in reserve.`,
   );
-  // "Then seeds and ongoing effects pay out or tick down." (milestone 4)
+  // Idle structures in this player's cities have now waited one Economy Phase.
+  for (const city of citiesControlledBy(state, playerId)) {
+    for (const st of city.structures.filter((s) => s.status === "idle")) {
+      st.status = "on";
+      state.log.push(`${city.name}'s ${st.kind} has waited out an Economy Phase and is working again.`);
+    }
+  }
   currentTurn(state).step = "action";
 }
 

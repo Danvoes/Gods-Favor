@@ -23,6 +23,41 @@ export interface PlayerState {
   convertedCities: string[];
   /** Set at the End of a turn when this player controls 2 regions; they win if they still do at their next Start. */
   holdingRegions: boolean;
+  /** Added to the cost of this player's next card (Red Tape +2, Rusted Gears +1, Efficient Tools -2), then reset. */
+  nextCardCost: number;
+  /** The game turn number of this player's current or most recent turn, and of the one before it (0 = none). */
+  lastTurn: number;
+  previousTurn: number;
+}
+
+export const STRUCTURE_CARDS = {
+  "PRO-F-01": "Grand Foundry",
+  "PRO-F-02": "Railway",
+  "PRO-F-03": "Workshop",
+  "PRO-F-04": "City Walls",
+  "PRO-F-06": "Market",
+  "PRO-F-07": "Paved Roads",
+} as const;
+export type StructureKind = (typeof STRUCTURE_CARDS)[keyof typeof STRUCTURE_CARDS];
+
+/**
+ * A structure belongs to its city and benefits whoever controls the city.
+ *   on   - working
+ *   idle - the city changed hands directly; the new controller waits one
+ *          Economy Phase or pays 2 Flock to turn it on
+ *   off  - the city went uncontrolled; whoever converts it next must pay
+ *          2 Flock to turn it on (no free wait, and Ada/Repair Crews can't help)
+ */
+export interface Structure {
+  kind: StructureKind;
+  status: "on" | "idle" | "off";
+}
+
+export interface DestroyedStructure {
+  city: string;
+  kind: StructureKind;
+  /** The game turn number it was destroyed on. */
+  turn: number;
 }
 
 export interface CityState {
@@ -31,6 +66,10 @@ export interface CityState {
   flock: Record<PlayerId, number>;
   controller: PlayerId | null;
   holySite: HolySiteLevel | null;
+  /** At most 2. */
+  structures: Structure[];
+  /** Ruin tokens: each cuts the city's income by 1 until cleared. */
+  ruin: number;
 }
 
 /** Calamity and Favor are the two decks players draw into their hands. */
@@ -79,6 +118,10 @@ export interface GameState {
   phase: Phase;
   /** A plain-language record of what happened, newest last. */
   log: string[];
+  /** Counts every turn taken, by anyone, starting at 1. */
+  turnCount: number;
+  /** Structures destroyed so far, so Repair Crews can rebuild recent ones. */
+  destroyed: DestroyedStructure[];
 }
 
 export interface NewPlayer {
@@ -92,6 +135,8 @@ export type Action =
   /** How many Flock to move from reserve to each city. Anything left stays in reserve. */
   | { type: "placeFlock"; playerId: PlayerId; placements: Record<string, number> }
   | { type: "endTurn"; playerId: PlayerId }
+  /** Pay 2 Flock to turn on an Idle or switched-off structure in a city you control. */
+  | { type: "restoreStructure"; playerId: PlayerId; city: string; index: number; payFrom?: Record<string, number> }
   /**
    * Cast a Calamity or Favor from hand. `targets` answers the card's questions
    * (see castingQuestions). `payFrom` says which cities pay whatever part of
