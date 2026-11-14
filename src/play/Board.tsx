@@ -2,6 +2,7 @@
 
 import type { City, Domain, GameData } from "../data/types";
 import { domainClass } from "../components/Faces";
+import { cardName, describeOngoing } from "../game/ongoing";
 import { conversionThreshold, flockIn, playerById, thresholdFor } from "../game/rules";
 import type { GameState, PlayerId } from "../game/types";
 
@@ -64,7 +65,7 @@ function CityCard({ data, city, state, pickFor }: { data: GameData; city: City; 
         {city.need && <> ({city.convertAtMatched} for {shortDomain(city.need)})</>}
       </p>
       <p className="city-control">{controller ? `Controlled by ${controller.name}` : "Uncontrolled"}</p>
-      {cityState && (cityState.structures.length > 0 || cityState.ruin > 0 || cityState.holySite) && (
+      {cityState && state && (cityState.structures.length > 0 || cityState.ruin > 0 || cityState.holySite || cityState.seeds.length > 0 || state.ongoing.some((m) => m.city === city.name)) && (
         <ul className="city-tokens" aria-label={`On ${city.name}`}>
           {cityState.holySite && <li className="token holy">{cityState.holySite}</li>}
           {cityState.structures.map((st, i) => (
@@ -74,6 +75,18 @@ function CityCard({ data, city, state, pickFor }: { data: GameData; city: City; 
             </li>
           ))}
           {cityState.ruin > 0 && <li className="token ruin">Ruin{cityState.ruin > 1 ? ` ×${cityState.ruin}` : ""}</li>}
+          {cityState.seeds.map((sd, i) => (
+            <li key={`seed-${i}`} className="token seed" title="Pays out at the owner's next Economy Phase">
+              {playerById(state, sd.owner).name}'s seed +{sd.amount}
+            </li>
+          ))}
+          {state.ongoing
+            .filter((m) => m.city === city.name)
+            .map((m) => (
+              <li key={`m-${m.id}`} className="token ongoing" title={describeOngoing(m)}>
+                {cardName(m.card)} on {playerById(state, m.player).name}
+              </li>
+            ))}
         </ul>
       )}
 

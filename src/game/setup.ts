@@ -41,6 +41,7 @@ export function createGame(data: GameData, newPlayers: NewPlayer[], seed: number
       holySite: null,
       structures: [],
       ruin: 0,
+      seeds: [],
     })),
     startingCities: {},
     decks: {
@@ -53,6 +54,8 @@ export function createGame(data: GameData, newPlayers: NewPlayer[], seed: number
     log: [],
     turnCount: 0,
     destroyed: [],
+    ongoing: [],
+    nextOngoingId: 1,
   };
 
   shuffle(state, state.decks.Calamity);

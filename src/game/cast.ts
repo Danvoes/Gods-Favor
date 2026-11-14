@@ -9,7 +9,7 @@
 import type { DivineCard, GameData } from "../data/types";
 import { cardCost, payCost, totalFlock } from "./costs";
 import { effectFor, isPlayable, specsFor, type EffectContext, type Option, type Playable, type Targets } from "./effects";
-import { RuleError, playerById } from "./rules";
+import { RuleError, cityState, playerById } from "./rules";
 import { checkTurn } from "./turn";
 import type { GameState, PlayerId, PlayerState } from "./types";
 
@@ -158,9 +158,27 @@ export function castCard(
   caster.hand.splice(caster.hand.indexOf(cardId), 1);
   const aimedAt = answers.player && answers.player !== caster.id ? ` at ${playerById(state, answers.player).name}` : "";
   state.log.push(`${caster.name} casts ${card.name}${aimedAt} (${card.deck}, cost ${cost}${paid}).`);
-  effect.resolve(ctx, answers);
+  resolveEffect(ctx, effect, answers);
   for (const line of lines) state.log.push(`  ${line}`);
   state.discards[card.deck].push(cardId);
 
   phase.step = "end";
+}
+
+/**
+ * Runs a card's effect. One rule comes first: "a Harvest Calamity on that
+ * city destroys the seed instead of its usual effect."
+ */
+export function resolveEffect(ctx: EffectContext, effect: Playable, answers: Targets) {
+  const { card, state } = ctx;
+  if (card.deck === "Calamity" && card.domain === "Harvest" && answers.city && answers.player) {
+    const city = cityState(state, answers.city);
+    const seed = city.seeds.find((sd) => sd.owner === answers.player);
+    if (seed) {
+      city.seeds.splice(city.seeds.indexOf(seed), 1);
+      ctx.report(`It destroys ${playerById(state, answers.player).name}'s seed in ${answers.city} instead of its usual effect.`);
+      return;
+    }
+  }
+  effect.resolve(ctx, answers);
 }

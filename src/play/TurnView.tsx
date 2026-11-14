@@ -8,7 +8,7 @@ import {
   citiesControlledBy,
   cityState,
   flockIn,
-  incomeBreakdown,
+  fullIncome,
   placeableCities,
   playerById,
   regionsControlledBy,
@@ -17,6 +17,7 @@ import {
 import type { Action, GameState, PlayerState, TurnStep } from "../game/types";
 import { Board } from "./Board";
 import { totalFlock } from "../game/costs";
+import { activeOngoing, cardName, describeOngoing } from "../game/ongoing";
 import { ActionStep, EndStep } from "./ActionStep";
 import { PaymentPicker, shortfallOf, sumOf } from "./Payment";
 import { DrawButtons, HandView } from "./SetupSteps";
@@ -115,7 +116,10 @@ function DrawStep({ data, player, game, act }: StepProps) {
 }
 
 function EconomyStep({ data, player, game, act }: StepProps) {
-  const income = incomeBreakdown(data, game, player.id);
+  const income = [
+    ...fullIncome(data, game, player.id).lines,
+    ...activeOngoing(game, player.id, "delayedReserve").map((m) => ({ label: `${cardName(m.card)} (extra)`, amount: m.amount })),
+  ];
   const cities = placeableCities(game, player.id);
   const [placements, setPlacements] = useState<Record<string, number>>({});
   const placed = Object.values(placements).reduce((a, b) => a + b, 0);
@@ -134,7 +138,10 @@ function EconomyStep({ data, player, game, act }: StepProps) {
               {income.map((line) => (
                 <tr key={line.label}>
                   <td>{line.label}</td>
-                  <td className="num">+{line.amount}</td>
+                  <td className="num">
+                    {line.amount < 0 ? "−" : "+"}
+                    {Math.abs(line.amount)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -290,6 +297,18 @@ export function Sidebar({ data, game }: { data: GameData; game: GameState }) {
                     {cities} {cities === 1 ? "city" : "cities"}
                     {regions.length > 0 && ` · region${regions.length > 1 ? "s" : ""} ${regions.join(", ")}`}
                   </span>
+                  {game.ongoing
+                    .filter((m) => m.player === id && !m.city)
+                    .map((m) => (
+                      <span key={m.id} className="player-effect">
+                        {describeOngoing(m)}
+                      </span>
+                    ))}
+                  {p.nextCardCost !== 0 && (
+                    <span className="player-effect">
+                      Next card costs {Math.abs(p.nextCardCost)} {p.nextCardCost > 0 ? "more" : "less"}
+                    </span>
+                  )}
                 </span>
               </li>
             );

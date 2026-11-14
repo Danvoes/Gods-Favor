@@ -1,6 +1,7 @@
 // Small rule calculations shared by the engine and the screens.
 
 import type { City, Domain, GameData, HolySiteLevel } from "../data/types";
+import { activeOngoing, cannotReceive } from "./ongoing";
 import type { CityState, GameState, PlayerId, PlayerState, StructureKind } from "./types";
 
 /** Every rule number in one place, so a rules change is a one-line edit. */
@@ -119,9 +120,14 @@ export function regionsControlledBy(data: GameData, state: GameState, playerId: 
   );
 }
 
-/** "Flock can be placed in any city you control, or any city where you already have Flock." */
+/**
+ * "Flock can be placed in any city you control, or any city where you already
+ * have Flock." Not where an Earthquake stops you receiving Flock this turn.
+ */
 export function placeableCities(state: GameState, playerId: PlayerId): string[] {
-  return state.cities.filter((c) => c.controller === playerId || flockIn(c, playerId) > 0).map((c) => c.name);
+  return state.cities
+    .filter((c) => (c.controller === playerId || flockIn(c, playerId) > 0) && !cannotReceive(state, playerId, c.name))
+    .map((c) => c.name);
 }
 
 export interface IncomeLine {
@@ -145,6 +151,10 @@ export function incomeBreakdown(data: GameData, state: GameState, playerId: Play
       const extra = RULES.structureIncome[st.kind];
       if (extra && st.status === "on") cityLines.push({ label: `${city.name} ${st.kind}`, amount: extra });
     }
+    if (activeOngoing(state, playerId, "cityNoIncome", city.name).length > 0) {
+      lines.push({ label: `${city.name}: no income (Failed Harvest)`, amount: 0 });
+      continue;
+    }
     if (city.ruin > 0) {
       // Ruin cuts the city's income, but a city never gives less than nothing.
       const before = cityLines.reduce((a, l) => a + l.amount, 0);
@@ -153,11 +163,31 @@ export function incomeBreakdown(data: GameData, state: GameState, playerId: Play
     }
     lines.push(...cityLines);
   }
+  for (const m of activeOngoing(state, playerId, "extraCityIncome")) {
+    const n = citiesControlledBy(state, playerId).length * m.amount;
+    if (n > 0) lines.push({ label: "Season of Plenty", amount: n });
+  }
   return lines;
 }
 
+/** Income after Rot in the Granary (halved, rounded down) and Famine (none at all). */
+export function fullIncome(data: GameData, state: GameState, playerId: PlayerId): { lines: IncomeLine[]; total: number } {
+  const lines = incomeBreakdown(data, state, playerId);
+  let total = lines.reduce((sum, l) => sum + l.amount, 0);
+  if (activeOngoing(state, playerId, "halveIncome").length > 0) {
+    const cut = total - Math.floor(total / 2);
+    lines.push({ label: "Rot in the Granary (halved)", amount: -cut });
+    total -= cut;
+  }
+  if (activeOngoing(state, playerId, "noIncome").length > 0 && total > 0) {
+    lines.push({ label: "Famine (no income)", amount: -total });
+    total = 0;
+  }
+  return { lines, total };
+}
+
 export function totalIncome(data: GameData, state: GameState, playerId: PlayerId): number {
-  return incomeBreakdown(data, state, playerId).reduce((sum, line) => sum + line.amount, 0);
+  return fullIncome(data, state, playerId).total;
 }
 
 /** How many working structures of a kind a city has. Structures only work in a controlled city. */

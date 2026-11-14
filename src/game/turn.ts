@@ -11,13 +11,14 @@
 
 import type { GameData } from "../data/types";
 import { takeTopCard } from "./deck";
+import { activateFor, activeOngoing, cannotReceive, cardName, countDown, startOfTurnLosses } from "./ongoing";
 import {
   RULES,
   RuleError,
   cityInfo,
   citiesControlledBy,
   flockIn,
-  incomeBreakdown,
+  fullIncome,
   placeableCities,
   playerById,
   regionsControlledBy,
@@ -41,6 +42,7 @@ export function beginTurn(data: GameData, state: GameState, playerId: PlayerId, 
     calamityHits: [],
   };
 
+  activateFor(state, playerId);
   const won = startPhase(data, state, playerId);
   if (!won) advance(data, state);
 }
@@ -50,6 +52,9 @@ export function beginTurn(data: GameData, state: GameState, playerId: PlayerId, 
 /** Returns true if this player has just won. */
 function startPhase(data: GameData, state: GameState, playerId: PlayerId): boolean {
   const player = playerById(state, playerId);
+
+  // Ongoing effects that hit "at the start of each of its owner's turns".
+  startOfTurnLosses(state, playerId, player.name);
 
   // 1. "Any city you control where your Flock is below 25% of its population becomes uncontrolled."
   for (const city of citiesControlledBy(state, playerId)) {
@@ -96,6 +101,11 @@ function convert(state: GameState, city: CityState, playerId: PlayerId, threshol
   const total = Object.values(city.flock).reduce((a, b) => a + b, 0);
   city.flock = { [playerId]: total };
   city.controller = playerId;
+
+  // A seed "is lost if an opponent converts the city first."
+  const lostSeeds = city.seeds.filter((sd) => sd.owner !== playerId);
+  city.seeds = city.seeds.filter((sd) => sd.owner === playerId);
+  for (const sd of lostSeeds) state.log.push(`${playerById(state, sd.owner).name}'s seed in ${city.name} is lost.`);
 
   const switchText = switched.length
     ? ` ${switched.map(([id, n]) => `${n} of ${playerById(state, id).name}'s Flock`).join(" and ")} switched over.`
@@ -163,7 +173,7 @@ function advance(data: GameData, state: GameState) {
   }
   if (phase.step === "economy" && player.reserve === 0) {
     state.log.push(`${player.name} has no Flock to place.`);
-    phase.step = "action";
+    finishEconomy(state, player.id);
   }
 }
 
@@ -210,11 +220,45 @@ function prophecyPhase(state: GameState) {
 
 function economyPhase(data: GameData, state: GameState) {
   const player = playerById(state, currentTurn(state).player);
-  const lines = incomeBreakdown(data, state, player.id);
-  const income = lines.reduce((sum, l) => sum + l.amount, 0);
-  player.reserve += income;
-  const detail = lines.map((l) => `${l.label} +${l.amount}`).join(", ");
-  state.log.push(`${player.name} collects ${income} Flock income (${detail}). Reserve is now ${player.reserve}.`);
+  const { lines, total } = fullIncome(data, state, player.id);
+  player.reserve += total;
+  const detail = lines.map((l) => `${l.label} ${l.amount < 0 ? "" : "+"}${l.amount}`).join(", ");
+  state.log.push(`${player.name} collects ${total} Flock income (${detail}). Reserve is now ${player.reserve}.`);
+
+  // Full Granary and Stockpile pay their extra Flock now, so it can be placed.
+  for (const m of activeOngoing(state, player.id, "delayedReserve")) {
+    player.reserve += m.amount;
+    state.log.push(`${cardName(m.card)} pays ${m.amount} more into ${player.name}'s reserve.`);
+  }
+}
+
+/**
+ * The end of the Economy Phase, after Flock is placed: "Then seeds and ongoing
+ * effects pay out or tick down." Idle structures have now waited their
+ * Economy Phase and turn on.
+ */
+function finishEconomy(state: GameState, playerId: PlayerId) {
+  const player = playerById(state, playerId);
+
+  for (const city of state.cities) {
+    for (const seed of city.seeds.filter((sd) => sd.owner === playerId && sd.plantedTurn < state.turnCount)) {
+      if (cannotReceive(state, playerId, city.name)) {
+        state.log.push(`${player.name}'s seed in ${city.name} can't pay out this turn (Earthquake), so it waits.`);
+        continue;
+      }
+      city.flock[playerId] = flockIn(city, playerId) + seed.amount;
+      city.seeds.splice(city.seeds.indexOf(seed), 1);
+      state.log.push(`${player.name}'s seed in ${city.name} yields ${seed.amount} Flock.`);
+    }
+  }
+
+  for (const city of citiesControlledBy(state, playerId)) {
+    for (const st of city.structures.filter((s) => s.status === "idle")) {
+      st.status = "on";
+      state.log.push(`${city.name}'s ${st.kind} has waited out an Economy Phase and is working again.`);
+    }
+  }
+  currentTurn(state).step = "action";
 }
 
 export function placeFlock(data: GameData, state: GameState, playerId: PlayerId, placements: Record<string, number>) {
@@ -247,14 +291,7 @@ export function placeFlock(data: GameData, state: GameState, playerId: PlayerId,
       ? `${player.name} keeps all ${player.reserve} Flock in reserve.`
       : `${player.name} places ${where}. ${player.reserve} stay in reserve.`,
   );
-  // Idle structures in this player's cities have now waited one Economy Phase.
-  for (const city of citiesControlledBy(state, playerId)) {
-    for (const st of city.structures.filter((s) => s.status === "idle")) {
-      st.status = "on";
-      state.log.push(`${city.name}'s ${st.kind} has waited out an Economy Phase and is working again.`);
-    }
-  }
-  currentTurn(state).step = "action";
+  finishEconomy(state, playerId);
 }
 
 // ----------------------------------------------------- 5. Action and 6. End
@@ -272,6 +309,8 @@ export function endTurn(data: GameData, state: GameState, playerId: PlayerId) {
       `${player.name} holds regions ${regions.join(" and ")}! If they still hold 2 regions at the start of their next turn, they win. Rivals have one round to stop them.`,
     );
   }
+
+  countDown(state, playerId, player.name);
 
   const index = state.turnOrder.indexOf(playerId);
   const nextIndex = (index + 1) % state.turnOrder.length;

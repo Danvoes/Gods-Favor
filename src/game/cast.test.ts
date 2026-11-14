@@ -62,11 +62,11 @@ describe("casting a card", () => {
   });
 
   it("refuses cards not in hand, cards not playable yet, and casting outside the Action step", () => {
-    const g = anaToAct(["HAR-F-01"]);
+    const g = anaToAct(["NEU-C-09"]);
     expect(() => cast(g, "NEU-C-01", { player: "p2", city: "Goldmere" })).toThrow(/doesn't have War in hand/);
-    expect(() => cast(g, "HAR-F-01")).toThrow(/Coming in milestone 4b: this card plants a seed/);
+    expect(() => cast(g, "NEU-C-09", { player: "p2" })).toThrow(/Coming in milestone 5: this card gives a Hero a strike/);
     const economy = newGame();
-    expect(() => cast(economy, "HAR-F-01")).toThrow(/while placing Flock/);
+    expect(() => cast(economy, "NEU-C-09")).toThrow(/while placing Flock/);
   });
 
   it("allows only one action: after casting, the turn can only end", () => {

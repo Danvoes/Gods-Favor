@@ -1,6 +1,7 @@
 // What things cost, and paying for them.
 
 import type { DivineCard, GameData } from "../data/types";
+import { activeOngoing } from "./ongoing";
 import { RULES, RuleError, cityState, flockIn, playerById, workingStructures } from "./rules";
 import type { GameState, PlayerId, PlayerState } from "./types";
 
@@ -15,6 +16,7 @@ export interface CostLine {
  *   + next-card changes (Red Tape +2, Rusted Gears +1, Efficient Tools -2)
  *   - 1 per working Workshop in a city you control (at most -2)
  *   + 2 per working City Walls in a Calamity's target city
+ *   + 2 during the affected player's turns under Sabotage
  * A cost never goes below 0.
  */
 export function cardCost(
@@ -27,6 +29,10 @@ export function cardCost(
   const player = playerById(state, playerId);
   const lines: CostLine[] = [{ label: `${card.name}`, amount: card.cost }];
   if (player.nextCardCost !== 0) lines.push({ label: "Next-card effects on you", amount: player.nextCardCost });
+  // Sabotage: only during the affected player's own turns.
+  if (state.phase.name === "turn" && state.phase.player === playerId) {
+    for (const m of activeOngoing(state, playerId, "costUp")) lines.push({ label: "Sabotage", amount: m.amount });
+  }
 
   const workshops = state.cities
     .filter((c) => c.controller === playerId)

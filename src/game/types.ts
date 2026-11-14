@@ -70,6 +70,43 @@ export interface CityState {
   structures: Structure[];
   /** Ruin tokens: each cuts the city's income by 1 until cleared. */
   ruin: number;
+  /** Seeds planted here. Each pays out to its owner at their next Economy Phase. */
+  seeds: Seed[];
+}
+
+export interface Seed {
+  owner: PlayerId;
+  amount: number;
+  /** The card that planted it. */
+  card: string;
+  /** The game turn it was planted on; it pays out at the owner's first Economy Phase after that. */
+  plantedTurn: number;
+}
+
+/**
+ * An effect that lasts. It waits until the affected player's next turn
+ * (`active` false), works during their turns, and counts down at the End of
+ * each of their turns ("next turn" always means the affected player's turns).
+ */
+export interface Ongoing {
+  id: number;
+  /** The card that caused it. */
+  card: string;
+  kind:
+    | "startLoss" //       lose `amount` Flock in `city` at the start of each turn (Blight, Drought, Late Frost)
+    | "noReceive" //       can't receive Flock in `city` (Earthquake)
+    | "noMoveOut" //       can't move Flock out of `city` (Wild Beasts)
+    | "noIncome" //        no income at all (Famine)
+    | "cityNoIncome" //    `city` gives no income (Failed Harvest)
+    | "halveIncome" //     income halved, rounded down (Rot in the Granary)
+    | "costUp" //          cards cost `amount` more (Sabotage)
+    | "extraCityIncome" // +`amount` income per controlled city (Season of Plenty)
+    | "delayedReserve"; // gain `amount` in reserve at Economy (Full Granary, Stockpile)
+  player: PlayerId;
+  city?: string;
+  amount: number;
+  turnsLeft: number;
+  active: boolean;
 }
 
 /** Calamity and Favor are the two decks players draw into their hands. */
@@ -122,6 +159,8 @@ export interface GameState {
   turnCount: number;
   /** Structures destroyed so far, so Repair Crews can rebuild recent ones. */
   destroyed: DestroyedStructure[];
+  ongoing: Ongoing[];
+  nextOngoingId: number;
 }
 
 export interface NewPlayer {

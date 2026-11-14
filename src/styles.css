@@ -473,6 +473,15 @@ body {
 .token.ruin { background: var(--ink); border-color: var(--ink); color: var(--surface); }
 .restore { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
 .cost-lines { margin: 0 0 4px; }
+.token.seed { border-color: var(--harvest); color: var(--harvest); }
+.token.ongoing { border-color: var(--health); color: var(--health); }
+.player-effect {
+  font-size: 0.75rem;
+  margin-top: 2px;
+  padding: 1px 6px;
+  border-left: 3px solid var(--health);
+  background: var(--bg);
+}
 
 /* Domain colours last, so they override any default colour above. */
 .d-nature { --domain: var(--nature); }

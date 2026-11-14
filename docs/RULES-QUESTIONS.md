@@ -26,6 +26,18 @@ Found while reading `docs/RULES.md` and the CSVs for the digital build. A comput
 12. **Repair Crews "since your last turn".** **Used:** structures destroyed after your previous turn, including during the current one. A structure rebuilt in an uncontrolled city starts switched off.
 13. **Costs and Ruin can't go negative.** **Used:** a card never costs less than 0, and Ruin can't make a city give less than 0 income.
 
+### Seeds and ongoing effects (milestone 4b). Proposed, and used for now
+
+14. **Where a seed's Flock goes.** **Used:** into the city it was planted in, as the planter's Flock.
+15. **"A Harvest Calamity on that city destroys the seed."** **Used:** it destroys one seed belonging to the Calamity's target player in that city, and the Calamity does nothing else.
+16. **Later hits and City Walls.** **Used:** City Walls soften the first hit of Blight or Late Frost, but not the later start-of-turn hits from Blight, Drought or Late Frost.
+17. **Earthquake "can't receive Flock".** **Used:** the target player can't add their own Flock to either city during their next turn: no placing, Favor gains there do nothing, and a seed there waits a turn.
+18. **Wild Beasts "can't move Flock out".** **Used:** blocks moving Flock (Animal Guides now, armies in milestone 6), but not paying costs from that city.
+19. **Sabotage.** **Used:** +2 only during the target's own turns, so counters they play on other turns aren't affected.
+20. **Full Granary and Stockpile.** **Used:** the extra 1 arrives at your next Economy Phase before you place Flock. Famine doesn't stop it, since it isn't income.
+21. **Rationing.** **Used:** cancels any lasting effect on you or on a city you control. Ruin tokens and "next card" cost changes aren't ongoing effects.
+22. **The Great Plague.** "Hits another city they control for 2" at the start of the target's next turn: who picks the city, the caster or the target? (Not playable until this is settled.)
+
 ## Answered
 
 ### Designer rulings (not yet in RULES.md)

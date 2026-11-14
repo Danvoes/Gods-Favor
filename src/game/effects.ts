@@ -16,8 +16,9 @@
 import type { Card, DivineCard, GameData } from "../data/types";
 import { randomInt } from "./random";
 import { REGIONS, citiesInRegion, cityInfo, cityState, flockIn, neighborsOf, placeableCities, playerById } from "./rules";
+import { addOngoing, cannotMoveOut, cannotReceive, describeOngoing } from "./ongoing";
 import { RULES, workingStructures } from "./rules";
-import { STRUCTURE_CARDS, type GameState, type PlayerState, type StructureKind } from "./types";
+import { STRUCTURE_CARDS, type GameState, type Ongoing, type PlayerState, type StructureKind } from "./types";
 
 export interface Option {
   value: string;
@@ -166,8 +167,31 @@ function nextCardCost(text: string, who: "target" | "self", amount: number): Pla
 
 function gainFlock(ctx: EffectContext, city: string, n: number) {
   const id = ctx.caster.id;
+  if (cannotReceive(ctx.state, id, city)) {
+    ctx.report(`${city}: ${ctx.caster.name} can't receive Flock there this turn (Earthquake).`);
+    return;
+  }
   setFlock(ctx.state, city, id, flockIn(cityState(ctx.state, city), id) + n);
   ctx.report(`${city}: ${ctx.caster.name} gains ${n} Flock.`);
+}
+
+/** Adds a lasting effect and reports it. It starts at the affected player's next turn. */
+function lasting(ctx: EffectContext, marker: Omit<Ongoing, "id" | "active" | "card">) {
+  const m = addOngoing(ctx.state, { ...marker, card: ctx.card.id });
+  ctx.report(`${playerName(ctx, m.player)}: ${describeOngoing(m)}.`);
+}
+
+/** "Plant a seed. It yields N Flock at your next Economy Phase." */
+function seedCard(text: string, amount: (ctx: EffectContext, city: string) => number): Playable {
+  return {
+    text,
+    targets: [{ ...favorCity, question: "Plant the seed in which city?" }],
+    resolve: (ctx, t) => {
+      const n = amount(ctx, t.city);
+      cityState(ctx.state, t.city).seeds.push({ owner: ctx.caster.id, amount: n, card: ctx.card.id, plantedTurn: ctx.state.turnCount });
+      ctx.report(`${ctx.caster.name} plants a seed in ${t.city}. It yields ${n} Flock at their next Economy Phase.`);
+    },
+  };
 }
 
 function loseReserve(ctx: EffectContext, playerId: string, n: number) {
@@ -328,7 +352,15 @@ export const EFFECTS: Record<string, CardEffect> = {
     resolve: (ctx, t) => citiesInRegion(ctx.data, t.region).forEach((c) => hit(ctx, c, t.player, 3)),
   },
   "NAT-C-03": cityLoss("Target loses 3 Flock, and one neighbor loses 2.", 3, 2),
-  "NAT-C-04": later4b("blocks Flock from arriving next turn (an ongoing effect)"),
+  "NAT-C-04": {
+    text: "Target loses 3 Flock, and one neighbor loses 1. Neither city can receive Flock next turn.",
+    targets: [targetPlayer, calamityCity, neighbor("Which neighbor does it spread to?")],
+    resolve: (ctx, t) => {
+      hit(ctx, t.city, t.player, 3);
+      hit(ctx, t.neighbor, t.player, 1);
+      for (const city of [t.city, t.neighbor]) lasting(ctx, { kind: "noReceive", player: t.player, city, amount: 0, turnsLeft: 1 });
+    },
+  },
   "NAT-C-05": {
     text: "Target loses 2 Flock, and every other city in the region loses 1.",
     targets: [targetPlayer, calamityCity],
@@ -338,7 +370,14 @@ export const EFFECTS: Record<string, CardEffect> = {
     },
   },
   "NAT-C-06": cityLoss("Target loses 2 Flock, and one neighbor loses 1.", 2, 1),
-  "NAT-C-07": later4b("stops Flock moving out next turn (an ongoing effect)"),
+  "NAT-C-07": {
+    text: "Target loses 2 Flock, and its owner can't move Flock out of that city next turn.",
+    targets: [targetPlayer, calamityCity],
+    resolve: (ctx, t) => {
+      hit(ctx, t.city, t.player, 2);
+      lasting(ctx, { kind: "noMoveOut", player: t.player, city: t.city, amount: 0, turnsLeft: 1 });
+    },
+  },
   "NAT-C-08": cityLoss("Target and one neighbor each lose 1 Flock.", 1, 1),
   "NAT-C-09": {
     text: "Move 1 of the target player's Flock to a neighboring city they don't control.",
@@ -400,9 +439,11 @@ export const EFFECTS: Record<string, CardEffect> = {
       {
         key: "city",
         question: "Move Flock out of which city?",
-        noneReason: "You have no Flock on the board.",
+        noneReason: "You have no Flock you're free to move (Wild Beasts stops moves out of a city).",
         options: (ctx) =>
-          ctx.state.cities.filter((c) => flockIn(c, ctx.caster.id) > 0).map((c) => withFlockLabel(ctx, ctx.caster.id, c.name)),
+          ctx.state.cities
+            .filter((c) => flockIn(c, ctx.caster.id) > 0 && !cannotMoveOut(ctx.state, ctx.caster.id, c.name))
+            .map((c) => withFlockLabel(ctx, ctx.caster.id, c.name)),
       },
       neighbor("Into which neighboring city?"),
       {
@@ -456,26 +497,98 @@ export const EFFECTS: Record<string, CardEffect> = {
   },
 
   // Harvest Calamities: time
-  "HAR-C-01": later4b("stops income for 2 turns (an ongoing effect)"),
-  "HAR-C-02": later4b("keeps hitting for 3 turns (an ongoing effect)"),
+  "HAR-C-01": {
+    text: "Target player gains no Flock income for their next 2 Economy Phases.",
+    targets: [targetPlayer],
+    resolve: (ctx, t) => lasting(ctx, { kind: "noIncome", player: t.player, amount: 0, turnsLeft: 2 }),
+  },
+  "HAR-C-02": {
+    text: "Target city loses 2 Flock now, then 1 more at the start of each of its owner's next 3 turns.",
+    targets: [targetPlayer, calamityCity],
+    resolve: (ctx, t) => {
+      hit(ctx, t.city, t.player, 2);
+      lasting(ctx, { kind: "startLoss", player: t.player, city: t.city, amount: 1, turnsLeft: 3 });
+    },
+  },
   "HAR-C-03": later4b("needs a ruling on who picks which cities pay (see rules questions)"),
-  "HAR-C-04": later4b("stops a city's income for 2 turns (an ongoing effect)"),
-  "HAR-C-05": later4b("keeps hitting for 3 turns (an ongoing effect)"),
+  "HAR-C-04": {
+    text: "Target city produces no income for 2 turns.",
+    targets: [targetPlayer, calamityCity],
+    resolve: (ctx, t) => {
+      lasting(ctx, { kind: "cityNoIncome", player: t.player, city: t.city, amount: 0, turnsLeft: 2 });
+    },
+  },
+  "HAR-C-05": {
+    text: "Target city loses 1 Flock at the start of each of its owner's next 3 turns.",
+    targets: [targetPlayer, calamityCity],
+    resolve: (ctx, t) => lasting(ctx, { kind: "startLoss", player: t.player, city: t.city, amount: 1, turnsLeft: 3 }),
+  },
   "HAR-C-06": reserveLoss("Target player loses 2 Flock from reserve.", 2),
-  "HAR-C-07": later4b("hits again next turn (an ongoing effect)"),
+  "HAR-C-07": {
+    text: "Target city loses 1 Flock now and 1 next turn.",
+    targets: [targetPlayer, calamityCity],
+    resolve: (ctx, t) => {
+      hit(ctx, t.city, t.player, 1);
+      lasting(ctx, { kind: "startLoss", player: t.player, city: t.city, amount: 1, turnsLeft: 1 });
+    },
+  },
   "HAR-C-08": reserveLoss("Target player loses 1 Flock from reserve.", 1),
-  "HAR-C-09": later4b("changes next turn's income (an ongoing effect)"),
+  "HAR-C-09": {
+    text: "Target player's next income is halved, rounded down.",
+    targets: [targetPlayer],
+    resolve: (ctx, t) => lasting(ctx, { kind: "halveIncome", player: t.player, amount: 0, turnsLeft: 1 }),
+  },
 
   // Harvest Favors: time
-  "HAR-F-01": later4b("plants a seed"),
-  "HAR-F-02": later4b("lasts 3 Economy Phases (an ongoing effect)"),
-  "HAR-F-03": later4b("plants a seed"),
-  "HAR-F-04": later4b("pays again next turn (an ongoing effect)"),
-  "HAR-F-05": later4b("cancels ongoing effects"),
-  "HAR-F-06": later4b("plants a seed"),
-  "HAR-F-07": later4b("pays again next turn (an ongoing effect)"),
+  "HAR-F-01": seedCard("Plant a seed. It yields 8 Flock at your next Economy Phase.", () => 8),
+  "HAR-F-02": {
+    text: "For your next 3 Economy Phases, every city you control gives +1 extra income.",
+    targets: [],
+    resolve: (ctx) => lasting(ctx, { kind: "extraCityIncome", player: ctx.caster.id, amount: 1, turnsLeft: 3 }),
+  },
+  "HAR-F-03": seedCard("Plant a seed. It yields 5 Flock at your next Economy Phase.", () => 5),
+  "HAR-F-04": {
+    text: "Gain 3 Flock in reserve now and 1 more next turn.",
+    targets: [],
+    resolve: (ctx) => {
+      gainReserve(ctx, 3);
+      lasting(ctx, { kind: "delayedReserve", player: ctx.caster.id, amount: 1, turnsLeft: 1 });
+    },
+  },
+  "HAR-F-05": {
+    text: "Cancel one ongoing effect on you or your cities (e.g. Famine, Blight or Drought), then gain 2 in reserve.",
+    targets: [
+      {
+        key: "effect",
+        question: "Which ongoing effect do you cancel?",
+        noneReason: "There's no ongoing effect on you or your cities.",
+        options: (ctx) =>
+          ctx.state.ongoing
+            .filter((m) => m.player === ctx.caster.id || (m.city && cityState(ctx.state, m.city).controller === ctx.caster.id))
+            .map((m) => ({ value: String(m.id), label: `${playerName(ctx, m.player)}: ${describeOngoing(m)}` })),
+      },
+    ],
+    resolve: (ctx, t) => {
+      const m = ctx.state.ongoing.find((x) => String(x.id) === t.effect)!;
+      ctx.state.ongoing = ctx.state.ongoing.filter((x) => x !== m);
+      ctx.report(`${describeOngoing(m).split(":")[0]} on ${playerName(ctx, m.player)} is cancelled.`);
+      gainReserve(ctx, 2);
+    },
+  },
+  "HAR-F-06": seedCard("Plant a seed. It yields 4 Flock at your next Economy Phase.", () => 4),
+  "HAR-F-07": {
+    text: "Gain 2 Flock in reserve now and 1 more at your next Economy Phase.",
+    targets: [],
+    resolve: (ctx) => {
+      gainReserve(ctx, 2);
+      lasting(ctx, { kind: "delayedReserve", player: ctx.caster.id, amount: 1, turnsLeft: 1 });
+    },
+  },
   "HAR-F-08": reserveGain("Gain 1 Flock in reserve.", 1),
-  "HAR-F-09": later4b("plants a seed"),
+  "HAR-F-09": seedCard(
+    "Plant a seed. It yields 3 Flock at your next Economy Phase, or 4 if the city matches your domain.",
+    (ctx, city) => (cityInfo(ctx.data, city).need === ctx.caster.domain ? 4 : 3),
+  ),
 
   // Production Calamities: permanence
   "PRO-C-01": {
@@ -498,7 +611,11 @@ export const EFFECTS: Record<string, CardEffect> = {
       }
     },
   },
-  "PRO-C-03": later4b("lasts 2 turns (an ongoing effect)"),
+  "PRO-C-03": {
+    text: "Target player's cards cost 2 more for their next 2 turns.",
+    targets: [targetPlayer],
+    resolve: (ctx, t) => lasting(ctx, { kind: "costUp", player: t.player, amount: 2, turnsLeft: 2 }),
+  },
   "PRO-C-04": later4b("locks a Prophet (Prophets arrive in milestone 5)"),
   "PRO-C-05": {
     text: "Target city loses 3 Flock, and one structure there is destroyed.",
