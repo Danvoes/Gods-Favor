@@ -6,14 +6,13 @@
 
 import { useState } from "react";
 import type { GameData } from "../data/types";
-import { domainClass } from "../components/Faces";
 import { RuleError, playerById, waitingFor } from "../game/rules";
-import { applyAction, createGame } from "../game/setup";
+import { applyAction, createGame } from "../game/engine";
 import type { Action, GameState, NewPlayer, PlayerId } from "../game/types";
-import { Board } from "./Board";
 import { NewGameForm } from "./NewGameForm";
 import { PassDevice } from "./PassDevice";
 import { ChooseStartingCity, DrawStartingHand, Reveal, ReviewHand } from "./SetupSteps";
+import { GameOver, TurnView } from "./TurnView";
 
 export function PlayScreen({ data }: { data: GameData }) {
   const [game, setGame] = useState<GameState | null>(null);
@@ -81,64 +80,16 @@ export function PlayScreen({ data }: { data: GameData }) {
             onLastCard={setReviewing}
           />
         );
-      case "ready":
-        return <TableView data={data} game={g} />;
+      case "turn":
+        // A new pass-the-device screen at the start of every turn, because
+        // the turn shows that player's hand.
+        return (
+          <PassDevice key={`${g.phase.round}-${g.phase.player}`} player={playerById(g, g.phase.player)} purpose="It's your turn.">
+            <TurnView data={data} game={g} act={act} />
+          </PassDevice>
+        );
+      case "gameOver":
+        return <GameOver data={data} game={g} />;
     }
   }
-}
-
-/** The board once setup is done. */
-function TableView({ data, game }: { data: GameData; game: GameState }) {
-  const [peeking, setPeeking] = useState<PlayerId | null>(null);
-  if (peeking) {
-    const player = playerById(game, peeking);
-    return (
-      <PassDevice player={player} purpose="Look at your hand.">
-        <ReviewHand data={data} player={player} onDone={() => setPeeking(null)} />
-      </PassDevice>
-    );
-  }
-  return (
-    <div className="table">
-      <section className="panel ready-banner">
-        <h2>Setup complete</h2>
-        <p className="muted">Turns arrive in the next milestone. For now you can look over the board and your hands.</p>
-      </section>
-      <div className="table-layout">
-        <Board data={data} state={game} />
-        <aside className="sidebar">
-          <section className="panel">
-            <h3>Turn order</h3>
-            <ol className="player-list">
-              {game.turnOrder.map((id) => {
-                const p = playerById(game, id);
-                return (
-                  <li key={id} className={`player-chip ${domainClass(p.domain)}`}>
-                    <span className="player-swatch" aria-hidden="true" />
-                    <span className="player-text">
-                      <strong>{p.name}</strong>
-                      <span className="muted">
-                        {p.domain} · reserve {p.reserve} · {p.hand.length} cards
-                      </span>
-                    </span>
-                    <button type="button" className="link-button" onClick={() => setPeeking(id)}>
-                      View hand
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-          <section className="panel">
-            <h3>What happened</h3>
-            <ol className="log">
-              {game.log.map((line, i) => (
-                <li key={i}>{line}</li>
-              ))}
-            </ol>
-          </section>
-        </aside>
-      </div>
-    </div>
-  );
 }

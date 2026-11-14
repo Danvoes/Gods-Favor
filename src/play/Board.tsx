@@ -2,7 +2,7 @@
 
 import type { City, Domain, GameData } from "../data/types";
 import { domainClass } from "../components/Faces";
-import { conversionThreshold, flockIn, playerById } from "../game/rules";
+import { conversionThreshold, flockIn, playerById, thresholdFor } from "../game/rules";
 import type { GameState, PlayerId } from "../game/types";
 
 const REGIONS = ["A", "B", "C"] as const;
@@ -27,7 +27,7 @@ export function Board({ data, state, pickFor }: BoardProps) {
             {data.cities
               .filter((c) => c.region === region)
               .map((city) => (
-                <CityCard key={city.name} city={city} state={state} pickFor={pickFor} />
+                <CityCard key={city.name} data={data} city={city} state={state} pickFor={pickFor} />
               ))}
           </div>
         </section>
@@ -36,7 +36,7 @@ export function Board({ data, state, pickFor }: BoardProps) {
   );
 }
 
-function CityCard({ city, state, pickFor }: { city: City; state?: GameState; pickFor?: BoardProps["pickFor"] }) {
+function CityCard({ data, city, state, pickFor }: { data: GameData; city: City; state?: GameState; pickFor?: BoardProps["pickFor"] }) {
   const cityState = state?.cities.find((c) => c.name === city.name);
   const present = state && cityState ? state.players.filter((p) => flockIn(cityState, p.id) > 0) : [];
   const controller = state && cityState?.controller ? playerById(state, cityState.controller) : null;
@@ -64,15 +64,22 @@ function CityCard({ city, state, pickFor }: { city: City; state?: GameState; pic
           {present.length === 0 && <li className="muted">No Flock yet</li>}
           {present.map((p) => {
             const n = flockIn(cityState, p.id);
-            const target = conversionThreshold(city, p.domain);
+            const controls = cityState.controller === p.id;
+            // The controller sees how safe their hold is; everyone else sees
+            // how close they are to converting.
+            const target = controls ? city.loseBelow : thresholdFor(data, state, city.name, p.id);
+            const label = controls ? `${n} (keep ${target}+)` : `${n}/${target}`;
+            const title = controls
+              ? `${n} Flock; lost if below ${target} at the start of ${p.name}'s turn`
+              : `${n} Flock; converts at ${target}`;
             return (
               <li key={p.id} className={`flock-row ${domainClass(p.domain)}`}>
                 <span className="flock-name">{p.name}</span>
-                <span className="flock-bar" aria-hidden="true">
-                  <span style={{ width: `${Math.min(100, (n / target) * 100)}%` }} />
+                <span className={`flock-bar${controls ? " held" : ""}`} aria-hidden="true">
+                  <span style={{ width: `${Math.min(100, (n / (controls ? n || 1 : target)) * 100)}%` }} />
                 </span>
-                <span className="flock-count" title={`${n} Flock; converts at ${target}`}>
-                  {n}/{target}
+                <span className="flock-count" title={title}>
+                  {label}
                 </span>
               </li>
             );

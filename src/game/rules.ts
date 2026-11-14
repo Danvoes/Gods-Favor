@@ -1,6 +1,6 @@
 // Small rule calculations shared by the engine and the screens.
 
-import type { City, Domain, GameData } from "../data/types";
+import type { City, Domain, GameData, HolySiteLevel } from "../data/types";
 import type { CityState, GameState, PlayerId, PlayerState } from "./types";
 
 /** Every rule number in one place, so a rules change is a one-line edit. */
@@ -14,6 +14,15 @@ export const RULES = {
    * See docs/RULES-QUESTIONS.md. Change this to `true` to allow it.
    */
   allowSharedDomains: false,
+  baseIncome: 1,
+  /** Extra income from a city whose need matches your domain. */
+  domainMatchIncome: 1,
+  /** Total income bonus from a Holy Site at each level. */
+  holySiteIncome: { Shrine: 1, Temple: 2, Cathedral: 3 } satisfies Record<HolySiteLevel, number>,
+  /** You control a region when you control this many of its 3 cities. */
+  citiesToControlRegion: 2,
+  /** You win by holding this many regions from the end of one turn to the start of your next. */
+  regionsToWin: 2,
 };
 
 /** Thrown when someone tries something the rules don't allow. The message is shown to players. */
@@ -75,5 +84,51 @@ export function waitingFor(state: GameState): PlayerId | null {
     return state.players.find((p) => !(p.id in phase.choices))?.id ?? null;
   }
   if (phase.name === "drawStartingHands") return state.turnOrder[phase.drawer] ?? null;
+  if (phase.name === "turn") return phase.player;
   return null;
+}
+
+export const REGIONS = ["A", "B", "C"] as const;
+
+export function citiesControlledBy(state: GameState, playerId: PlayerId): CityState[] {
+  return state.cities.filter((c) => c.controller === playerId);
+}
+
+/** The regions where a player controls at least 2 of the 3 cities. */
+export function regionsControlledBy(data: GameData, state: GameState, playerId: PlayerId): string[] {
+  return REGIONS.filter(
+    (region) =>
+      citiesControlledBy(state, playerId).filter((c) => cityInfo(data, c.name).region === region).length >=
+      RULES.citiesToControlRegion,
+  );
+}
+
+/** "Flock can be placed in any city you control, or any city where you already have Flock." */
+export function placeableCities(state: GameState, playerId: PlayerId): string[] {
+  return state.cities.filter((c) => c.controller === playerId || flockIn(c, playerId) > 0).map((c) => c.name);
+}
+
+export interface IncomeLine {
+  label: string;
+  amount: number;
+}
+
+/**
+ * Income, line by line: 1 base, plus each controlled city's income (2 for a
+ * large city), +1 if its need matches your domain, plus its Holy Site bonus.
+ */
+export function incomeBreakdown(data: GameData, state: GameState, playerId: PlayerId): IncomeLine[] {
+  const domain = playerById(state, playerId).domain;
+  const lines: IncomeLine[] = [{ label: "Base income", amount: RULES.baseIncome }];
+  for (const city of citiesControlledBy(state, playerId)) {
+    const info = cityInfo(data, city.name);
+    lines.push({ label: `${city.name} (${info.size.toLowerCase()} city)`, amount: info.income });
+    if (info.need === domain) lines.push({ label: `${city.name} matches your domain`, amount: RULES.domainMatchIncome });
+    if (city.holySite) lines.push({ label: `${city.name} ${city.holySite}`, amount: RULES.holySiteIncome[city.holySite] });
+  }
+  return lines;
+}
+
+export function totalIncome(data: GameData, state: GameState, playerId: PlayerId): number {
+  return incomeBreakdown(data, state, playerId).reduce((sum, line) => sum + line.amount, 0);
 }

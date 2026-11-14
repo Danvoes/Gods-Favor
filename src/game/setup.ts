@@ -6,14 +6,13 @@
 //   5. work out turn order                  -> when the last city is chosen
 //   6. draw 5 cards, Calamity or Favor each -> "drawCard" actions
 //
-// applyAction never changes the state it's given. It copies the state, makes
-// the change on the copy and returns the copy. That way the screen can always
-// trust that an old state still shows what it showed before.
 
 import type { GameData } from "../data/types";
+import { takeTopCard } from "./deck";
 import { newSeed, randomInt, shuffle } from "./random";
 import { RULES, RuleError, cityInfo, playerById } from "./rules";
-import type { Action, DrawDeck, GameState, NewPlayer, PlayerId } from "./types";
+import { beginTurn } from "./turn";
+import type { DrawDeck, GameState, NewPlayer, PlayerId } from "./types";
 
 export function createGame(data: GameData, newPlayers: NewPlayer[], seed: number = newSeed()): GameState {
   checkNewPlayers(newPlayers);
@@ -28,6 +27,8 @@ export function createGame(data: GameData, newPlayers: NewPlayer[], seed: number
       seat,
       reserve: 0,
       hand: [],
+      convertedCities: [],
+      holdingRegions: false,
     })),
     turnOrder: [],
     cities: data.cities.map((c) => ({ name: c.name, flock: {}, controller: null, holySite: null })),
@@ -68,20 +69,7 @@ function checkNewPlayers(newPlayers: NewPlayer[]) {
   }
 }
 
-export function applyAction(data: GameData, state: GameState, action: Action): GameState {
-  const next = structuredClone(state);
-  switch (action.type) {
-    case "chooseStartingCity":
-      chooseStartingCity(data, next, action.playerId, action.city);
-      break;
-    case "drawCard":
-      drawCard(data, next, action.playerId, action.deck);
-      break;
-  }
-  return next;
-}
-
-function chooseStartingCity(data: GameData, state: GameState, playerId: PlayerId, city: string) {
+export function chooseStartingCity(data: GameData, state: GameState, playerId: PlayerId, city: string) {
   const phase = state.phase;
   if (phase.name !== "chooseStartingCities") throw new RuleError("Starting cities have already been chosen.");
   const player = playerById(state, playerId);
@@ -135,7 +123,7 @@ export function decideTurnOrder(data: GameData, state: GameState, choices: Recor
 }
 
 /** Setup step 6: draw one card at a time, choosing the deck each time. */
-function drawCard(data: GameData, state: GameState, playerId: PlayerId, deck: DrawDeck) {
+export function drawStartingCard(data: GameData, state: GameState, playerId: PlayerId, deck: DrawDeck) {
   const phase = state.phase;
   if (phase.name !== "drawStartingHands") throw new RuleError("It isn't time to draw starting hands.");
   const drawerId = state.turnOrder[phase.drawer];
@@ -152,22 +140,10 @@ function drawCard(data: GameData, state: GameState, playerId: PlayerId, deck: Dr
     state.log.push(`${player.name} drew ${counts.Calamity} Calamity and ${counts.Favor} Favor.`);
     phase.drawer += 1;
     if (phase.drawer === state.turnOrder.length) {
-      state.phase = { name: "ready" };
       state.log.push("Setup complete.");
+      beginTurn(data, state, state.turnOrder[0], 1);
     }
   }
-}
-
-/** Takes the top card of a deck, reshuffling its discard pile into it if it has run out. */
-export function takeTopCard(state: GameState, deck: DrawDeck | "Free Will"): string {
-  if (state.decks[deck].length === 0) {
-    if (state.discards[deck].length === 0) throw new RuleError(`The ${deck} deck and its discard pile are both empty.`);
-    state.decks[deck] = state.discards[deck];
-    state.discards[deck] = [];
-    shuffle(state, state.decks[deck]);
-    state.log.push(`The ${deck} deck ran out, so its discard pile was shuffled into a new deck.`);
-  }
-  return state.decks[deck].pop()!;
 }
 
 function countByDeck(data: GameData, cardIds: string[]) {

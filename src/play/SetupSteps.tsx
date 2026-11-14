@@ -85,20 +85,27 @@ export function DrawStartingHand({
           Draw {RULES.handSize} cards, choosing a deck for each one. Calamities are disasters you inflict; Favors are
           miracles you grant.
         </p>
-        <div className="draw-buttons">
-          {(["Calamity", "Favor"] as const).map((deck) => (
-            <button key={deck} type="button" className={`button draw-${deck.toLowerCase()}`} onClick={() => draw(deck)}>
-              Draw a {deck}
-              <span className="muted"> ({game.decks[deck].length} left)</span>
-            </button>
-          ))}
-          <span className="draw-count">
-            {player.hand.length} of {RULES.handSize}
-          </span>
-        </div>
+        <DrawButtons game={game} handSize={player.hand.length} onDraw={draw} />
         <HandView data={data} cardIds={player.hand} />
       </section>
     </PassDevice>
+  );
+}
+
+/** The "Draw a Calamity / Draw a Favor" buttons, with cards left in each deck. */
+export function DrawButtons({ game, handSize, onDraw }: { game: GameState; handSize: number; onDraw: (deck: DrawDeck) => void }) {
+  return (
+    <div className="draw-buttons">
+      {(["Calamity", "Favor"] as const).map((deck) => (
+        <button key={deck} type="button" className={`button draw-${deck.toLowerCase()}`} onClick={() => onDraw(deck)}>
+          Draw a {deck}
+          <span className="muted"> ({game.decks[deck].length} left)</span>
+        </button>
+      ))}
+      <span className="draw-count">
+        {handSize} of {RULES.handSize}
+      </span>
+    </div>
   );
 }
 

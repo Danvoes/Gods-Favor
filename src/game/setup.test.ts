@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { loadGameData } from "../data";
 import { RULES, RuleError, cityState, conversionThreshold, cityInfo, thresholdFor, waitingFor } from "./rules";
-import { applyAction, createGame } from "./setup";
+import { applyAction, createGame } from "./engine";
 import type { Action, GameState, NewPlayer } from "./types";
 
 const data = loadGameData();
@@ -141,8 +141,8 @@ describe("drawing starting hands", () => {
     }
     expect(g.players.every((p) => p.hand.length === 5)).toBe(true);
     expect(g.decks.Calamity.length + g.decks.Favor.length).toBe(100 - 15);
-    expect(g.phase.name).toBe("ready");
-    expect(waitingFor(g)).toBeNull();
+    expect(g.phase).toMatchObject({ name: "turn", player: g.turnOrder[0], round: 1 });
+    expect(waitingFor(g)).toBe(g.turnOrder[0]);
     expect(g.log).toContain("Ana drew 3 Calamity and 2 Favor.");
   });
 });

@@ -338,6 +338,105 @@ body {
   .tabs { margin-left: 0; width: 100%; }
 }
 
+/* ---- Turn ---- */
+.turn-panel { border-top: 6px solid var(--domain); }
+.turn-header h2 { margin: 0; color: var(--domain); }
+.turn-kicker { margin: 0; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; color: var(--muted); }
+
+.phase-track {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+.phase {
+  display: grid;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--muted);
+}
+.phase.done { color: var(--ink); }
+.phase.done .phase-name::before { content: "✓ "; }
+.phase.current { background: var(--domain); color: #fff; font-weight: 700; }
+.phase-note { font-size: 0.68rem; opacity: 0.8; }
+
+.this-turn {
+  margin: 0 0 12px;
+  padding: 10px 12px 10px 28px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  display: grid;
+  gap: 4px;
+}
+.step h3 { margin: 4px 0; }
+.small-heading { margin: 0 0 6px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.small { font-size: 0.85rem; }
+
+.economy { display: grid; grid-template-columns: minmax(200px, 280px) 1fr; gap: 24px; margin-top: 8px; }
+.income-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.income-table td { padding: 4px 0; border-bottom: 1px solid var(--line); }
+.income-table tfoot td { font-weight: 700; border-bottom: none; padding-top: 8px; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.placement-list { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 6px; }
+.placement-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.placement-city { display: grid; }
+.stepper { display: inline-flex; align-items: center; gap: 6px; }
+.step-btn {
+  font: inherit;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.step-btn:disabled { opacity: 0.35; cursor: default; }
+.step-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.step-value { min-width: 1.6em; text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
+.placement-summary { margin: 8px 0 0; }
+
+.hand-details { margin: 8px 0; }
+.hand-details summary { cursor: pointer; color: var(--accent); }
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  background: var(--domain);
+  color: #fff;
+  vertical-align: middle;
+}
+.badge.warn { background: var(--ink); }
+.player-chip[aria-current="true"] .player-swatch { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--domain); }
+
+.winner-banner { border-top: 8px solid var(--domain); text-align: center; }
+.winner-banner h2 { font-size: 2rem; color: var(--domain); }
+
+@media (max-width: 700px) {
+  .economy { grid-template-columns: 1fr; }
+  .phase-track { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* Domain colours last, so they override any default colour above. */
 .d-nature { --domain: var(--nature); }
 .d-harvest { --domain: var(--harvest); }

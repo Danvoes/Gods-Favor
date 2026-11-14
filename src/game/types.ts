@@ -19,6 +19,10 @@ export interface PlayerState {
   reserve: number;
   /** Card ids in hand. Only shown to the player whose turn it is. */
   hand: string[];
+  /** Every distinct city this player has ever converted, in order. Drives Prophet tiers and strike resets. */
+  convertedCities: string[];
+  /** Set at the End of a turn when this player controls 2 regions; they win if they still do at their next Start. */
+  holdingRegions: boolean;
 }
 
 export interface CityState {
@@ -37,8 +41,18 @@ export type Phase =
   | { name: "chooseStartingCities"; choices: Record<PlayerId, string> }
   /** Each player draws 5 cards, in turn order. `drawer` indexes turnOrder. */
   | { name: "drawStartingHands"; drawer: number }
-  /** Setup is complete. Turns arrive in milestone 3. */
-  | { name: "ready" };
+  /** A player's turn. Start and End happen on their own; these steps wait for the player. */
+  | { name: "turn"; player: PlayerId; round: number; step: TurnStep; logStart: number }
+  | { name: "gameOver"; winner: PlayerId };
+
+/**
+ * The parts of a turn that need a decision. (Start, Prophecy and End
+ * currently need none, so the game runs them by itself.)
+ *   draw    - refill your hand to 5, choosing a deck each time
+ *   economy - place income and reserve Flock on the board, or keep it
+ *   action  - do one action (for now: end the turn)
+ */
+export type TurnStep = "draw" | "economy" | "action";
 
 export interface GameState {
   /** The seed this game started from, kept so the game can be replayed. */
@@ -65,4 +79,7 @@ export interface NewPlayer {
 
 export type Action =
   | { type: "chooseStartingCity"; playerId: PlayerId; city: string }
-  | { type: "drawCard"; playerId: PlayerId; deck: DrawDeck };
+  | { type: "drawCard"; playerId: PlayerId; deck: DrawDeck }
+  /** How many Flock to move from reserve to each city. Anything left stays in reserve. */
+  | { type: "placeFlock"; playerId: PlayerId; placements: Record<string, number> }
+  | { type: "endTurn"; playerId: PlayerId };
