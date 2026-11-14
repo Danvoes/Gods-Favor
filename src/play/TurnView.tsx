@@ -16,6 +16,7 @@ import {
 } from "../game/rules";
 import type { Action, GameState, PlayerState, TurnStep } from "../game/types";
 import { Board } from "./Board";
+import { ActionStep, EndStep } from "./ActionStep";
 import { DrawButtons, HandView } from "./SetupSteps";
 
 type TurnPhase = Extract<GameState["phase"], { name: "turn" }>;
@@ -40,7 +41,8 @@ export function TurnView({ data, game, act }: TurnProps) {
         <ThisTurn lines={game.log.slice(phase.logStart + 1)} />
         {phase.step === "draw" && <DrawStep data={data} player={player} game={game} act={act} />}
         {phase.step === "economy" && <EconomyStep data={data} player={player} game={game} act={act} />}
-        {phase.step === "action" && <ActionStep data={data} player={player} act={act} />}
+        {phase.step === "action" && <ActionStep data={data} game={game} player={player} act={act} />}
+        {phase.step === "end" && <EndStep player={player} act={act} />}
       </section>
       <div className="table-layout">
         <Board data={data} state={game} />
@@ -56,7 +58,7 @@ const PHASES: { name: string; step?: TurnStep; note?: string }[] = [
   { name: "Prophecy", note: "later milestone" },
   { name: "Economy", step: "economy" },
   { name: "Action", step: "action" },
-  { name: "End" },
+  { name: "End", step: "end" },
 ];
 
 /** The six phases of a turn, with the current one highlighted. */
@@ -188,27 +190,6 @@ function EconomyStep({ data, player, game, act }: StepProps) {
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function ActionStep({ data, player, act }: Omit<StepProps, "game">) {
-  return (
-    <div className="step">
-      <h3>Action</h3>
-      <p className="muted">
-        Casting cards, moving your Prophet, sending your Hero into battle and building Holy Sites arrive in later
-        milestones. For now, end your turn. The End phase checks whether you hold 2 regions.
-      </p>
-      <details className="hand-details">
-        <summary>Your hand ({player.hand.length} cards)</summary>
-        <HandView data={data} cardIds={player.hand} />
-      </details>
-      <div className="form-actions">
-        <button type="button" className="button primary" onClick={() => act({ type: "endTurn", playerId: player.id })}>
-          End turn
-        </button>
       </div>
     </div>
   );

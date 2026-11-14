@@ -30,4 +30,5 @@ npm test
 
 - Milestone 1: a card browser showing every card, Prophet and Hero, filterable by deck, domain and tier.
 - Milestone 2: game setup for 2–4 players on one device (names and domains, secret starting cities, turn order, starting hands) and the board.
-- Milestone 3: the turn loop. Each turn runs Start (conversions, losing cities, win check), Draw, Economy (income and placing Flock) and End. Free Will and the Action choices are still to come.
+- Milestone 3: the turn loop. Each turn runs Start (conversions, losing cities, win check), Draw, Economy (income and placing Flock) and End. Free Will and most Action choices are still to come.
+- Milestone 4a: casting cards. 49 of the 100 Calamity and Favor cards can be played; the rest show which milestone brings them.

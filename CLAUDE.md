@@ -27,6 +27,7 @@ Open rules questions are tracked in `docs/RULES-QUESTIONS.md`. Don't silently pi
 - **The engine** (`src/game/engine.ts`): `createGame(data, players, seed)` makes a new game; `applyAction(data, state, action)` returns a *new* state (it copies, never edits the old one) or throws a `RuleError` with a message for players. Rule numbers live in `RULES` in `src/game/rules.ts`.
 - **Seeded randomness** (`src/game/random.ts`): shuffles and tie-breaks use a generator whose state is stored in the game state, so the same seed replays the same game. Never use `Math.random()` in game logic.
 - **Turns** (`src/game/turn.ts`): phases that need no decision (Start, Prophecy, End) run on their own; the game stops at the steps that wait for the player (`draw`, `economy`, `action`). Each phase is a function named after its rulebook section. Every event is written to `state.log` in plain language, which the screens show.
+- **Card effects** (`src/game/effects.ts`): one entry per Calamity/Favor card, holding a copy of its CSV text, its target questions (each offering only legal choices) and what it does. Cards not built yet say which milestone brings them. `src/game/cast.test.ts` fails if any card lacks an entry or if a card's CSV text no longer matches its entry: then update that card's code. Casting (`src/game/cast.ts`) checks answers, pays reserve first then caster-chosen cities, resolves, discards.
 - **Pass-and-play privacy**: hidden information (secret choices, hands) is shown only behind a `PassDevice` screen. The state holds everything; screens decide what to reveal.
 - **Player colour = domain colour**, which relies on domains being unique (see open question).
 - **Tests with Vitest.** `src/data/data.test.ts` checks the CSVs against the rulebook's component counts; rules logic gets tests as it's written.
@@ -41,8 +42,8 @@ In `cards.csv`, Free Will rows reuse the `domain` column for **Prophet/Hero** an
 data/            cards.csv, characters.csv, cities.csv (designer-owned)
 docs/            RULES.md (designer-owned), RULES-QUESTIONS.md
 src/data/        types, CSV parsing + validation, data tests
-src/game/        rules engine, no React: engine.ts (entry point), setup.ts, turn.ts, rules.ts (helpers + RULES numbers), deck.ts, random.ts, types.ts, tests
-src/play/        Play tab screens: new game, pass-the-device, setup steps, turn view, board
+src/game/        rules engine, no React: engine.ts (entry point), setup.ts, turn.ts, cast.ts, effects.ts (every card), rules.ts (helpers + RULES numbers), deck.ts, random.ts, types.ts; tests + testHelpers.ts
+src/play/        Play tab screens: new game, pass-the-device, setup steps, turn view, action/cast panel, board
 src/components/  shared display pieces (card and character faces)
 src/browser/     card browser tab: filter logic + component
 src/App.tsx      top-level screen with the Play / Card browser tabs
@@ -62,7 +63,8 @@ Run `npm test` and `npm run build` before committing.
 1. ✅ Load all cards, characters and cities from CSV; card browser filterable by deck, domain and tier.
 2. ✅ Game setup and board: choose players and domains, secret starting cities, turn order, starting hands, board view.
 3. ✅ Turn loop and economy: six phases, drawing, income, placing Flock, losing and converting cities, Holy Site desecration, holding regions and victory. Placeholders: Prophecy (milestone 5) and the Action choices (only "End turn" so far).
-4. Casting cards: costs, targeting, held vs. must-play cards, counters, seeds, ongoing effects, structures.
+4a. ✅ Casting: pick a card, answer its questions, pay (reserve then cities), resolve, discard. 49 of 100 Calamity/Favor cards playable (Flock gains/losses, spread, reserve, random discards, discard-pile counts).
+4b. Counters and redirects, cost changes, seeds, ongoing effects, structures, Ruin, and the remaining non-character cards.
 5. Prophets, Heroes, Free Will and strikes.
 6. Combat.
 7. Holy Sites, polish, save/resume.

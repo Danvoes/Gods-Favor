@@ -23,13 +23,20 @@ import {
   regionsControlledBy,
   thresholdFor,
 } from "./rules";
-import type { CityState, DrawDeck, GameState, PlayerId } from "./types";
+import type { CityState, DrawDeck, GameState, PlayerId, TurnStep } from "./types";
 
 /** Starts a player's turn: runs the Start phase, then any phases needing no decision. */
 export function beginTurn(data: GameData, state: GameState, playerId: PlayerId, round: number) {
   const player = playerById(state, playerId);
   state.log.push(`Round ${round}: ${player.name}'s turn.`);
-  state.phase = { name: "turn", player: playerId, round, step: "draw", logStart: state.log.length - 1 };
+  state.phase = {
+    name: "turn",
+    player: playerId,
+    round,
+    step: "draw",
+    logStart: state.log.length - 1,
+    calamityHits: [],
+  };
 
   const won = startPhase(data, state, playerId);
   if (!won) advance(data, state);
@@ -132,18 +139,18 @@ function advance(data: GameData, state: GameState) {
   }
 }
 
-function currentTurn(state: GameState) {
+export function currentTurn(state: GameState) {
   if (state.phase.name !== "turn") throw new RuleError("No one is taking a turn right now.");
   return state.phase;
 }
 
-function checkTurn(state: GameState, playerId: PlayerId, step: "draw" | "economy" | "action") {
+export function checkTurn(state: GameState, playerId: PlayerId, ...steps: TurnStep[]) {
   const phase = currentTurn(state);
   if (phase.player !== playerId) {
     throw new RuleError(`It's ${playerById(state, phase.player).name}'s turn, not ${playerById(state, playerId).name}'s.`);
   }
-  if (phase.step !== step) {
-    const what = { draw: "drawing cards", economy: "placing Flock", action: "taking an action" };
+  if (!steps.includes(phase.step)) {
+    const what = { draw: "drawing cards", economy: "placing Flock", action: "taking an action", end: "ending the turn" };
     throw new RuleError(`${playerById(state, playerId).name} can't do that while ${what[phase.step]}.`);
   }
   return phase;
@@ -219,7 +226,8 @@ export function placeFlock(data: GameData, state: GameState, playerId: PlayerId,
 // ----------------------------------------------------- 5. Action and 6. End
 
 export function endTurn(data: GameData, state: GameState, playerId: PlayerId) {
-  const phase = checkTurn(state, playerId, "action");
+  // "End turn" works from the action step (skipping the action) or after it.
+  const phase = checkTurn(state, playerId, "action", "end");
   const player = playerById(state, playerId);
 
   // End: "If you control 2 of the 3 regions, you are marked as holding them."

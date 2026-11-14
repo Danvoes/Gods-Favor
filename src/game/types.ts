@@ -42,7 +42,15 @@ export type Phase =
   /** Each player draws 5 cards, in turn order. `drawer` indexes turnOrder. */
   | { name: "drawStartingHands"; drawer: number }
   /** A player's turn. Start and End happen on their own; these steps wait for the player. */
-  | { name: "turn"; player: PlayerId; round: number; step: TurnStep; logStart: number }
+  | {
+      name: "turn";
+      player: PlayerId;
+      round: number;
+      step: TurnStep;
+      logStart: number;
+      /** Cities a Calamity has hit this turn (Herbal Remedy checks this). */
+      calamityHits: string[];
+    }
   | { name: "gameOver"; winner: PlayerId };
 
 /**
@@ -50,9 +58,10 @@ export type Phase =
  * currently need none, so the game runs them by itself.)
  *   draw    - refill your hand to 5, choosing a deck each time
  *   economy - place income and reserve Flock on the board, or keep it
- *   action  - do one action (for now: end the turn)
+ *   action  - do one action (cast a card, or skip)
+ *   end     - the action is done; the player reviews what happened, then ends the turn
  */
-export type TurnStep = "draw" | "economy" | "action";
+export type TurnStep = "draw" | "economy" | "action" | "end";
 
 export interface GameState {
   /** The seed this game started from, kept so the game can be replayed. */
@@ -82,4 +91,16 @@ export type Action =
   | { type: "drawCard"; playerId: PlayerId; deck: DrawDeck }
   /** How many Flock to move from reserve to each city. Anything left stays in reserve. */
   | { type: "placeFlock"; playerId: PlayerId; placements: Record<string, number> }
-  | { type: "endTurn"; playerId: PlayerId };
+  | { type: "endTurn"; playerId: PlayerId }
+  /**
+   * Cast a Calamity or Favor from hand. `targets` answers the card's questions
+   * (see castingQuestions). `payFrom` says which cities pay whatever part of
+   * the cost the reserve can't cover.
+   */
+  | {
+      type: "castCard";
+      playerId: PlayerId;
+      cardId: string;
+      targets: Record<string, string>;
+      payFrom?: Record<string, number>;
+    };

@@ -1,62 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { loadGameData } from "../data";
-import { applyAction, createGame } from "./engine";
-import { RULES, cityState, playerById, totalIncome, incomeBreakdown } from "./rules";
-import type { Action, GameState, PlayerId } from "./types";
-
-const data = loadGameData();
-
-/**
- * A 3-player game, set up and on Ana's first turn.
- * Ana (Nature) starts in Ashgrove, Ben (Harvest) in Goldmere, Cy (Health) in
- * Brightwell. Ashgrove is the only small city, so Ana goes first.
- */
-function newGame(): GameState {
-  let g = createGame(
-    data,
-    [
-      { name: "Ana", domain: "Nature" },
-      { name: "Ben", domain: "Harvest" },
-      { name: "Cy", domain: "Health/Fertility" },
-    ],
-    123,
-  );
-  const starts = { p1: "Ashgrove", p2: "Goldmere", p3: "Brightwell" };
-  for (const [playerId, city] of Object.entries(starts)) g = act(g, { type: "chooseStartingCity", playerId, city });
-  for (const playerId of g.turnOrder) {
-    for (let i = 0; i < RULES.handSize; i++) g = act(g, { type: "drawCard", playerId, deck: "Favor" });
-  }
-  return g;
-}
-
-function act(g: GameState, action: Action): GameState {
-  return applyAction(data, g, action);
-}
-
-/** Changes a game directly, to set up a situation for a test. */
-function tweak(g: GameState, change: (g: GameState) => void): GameState {
-  const copy = structuredClone(g);
-  change(copy);
-  return copy;
-}
-
-function setFlock(g: GameState, city: string, flock: Record<PlayerId, number>, controller: PlayerId | null = null) {
-  const c = cityState(g, city);
-  c.flock = flock;
-  c.controller = controller;
-}
-
-/** Finishes whatever's left of the current player's turn without doing anything. */
-function passTurn(g: GameState): GameState {
-  if (g.phase.name !== "turn") throw new Error("not a turn");
-  const id = g.phase.player;
-  while (g.phase.name === "turn" && g.phase.step === "draw") g = act(g, { type: "drawCard", playerId: id, deck: "Favor" });
-  if (g.phase.name === "turn" && g.phase.step === "economy") g = act(g, { type: "placeFlock", playerId: id, placements: {} });
-  return act(g, { type: "endTurn", playerId: id });
-}
-
-const step = (g: GameState) => (g.phase.name === "turn" ? g.phase.step : g.phase.name);
-const current = (g: GameState) => (g.phase.name === "turn" ? g.phase.player : null);
+import { cityState, playerById, totalIncome, incomeBreakdown } from "./rules";
+import type { GameState } from "./types";
+import { act, current, data, newGame, passTurn, setFlock, step, tweak } from "./testHelpers";
 
 describe("the first turn", () => {
   it("starts with the first player, skips Draw (hand is full), and collects 1 base income", () => {

@@ -8,6 +8,14 @@ Found while reading `docs/RULES.md` and the CSVs for the digital build. A comput
    **Proposed:** treat it as missing until it returns.
 2. **Can two players pick the same domain?** Setup says each player "picks a god and its domain" but not whether domains must be different. Each domain has 2 Prophets and 2 Heroes, so two players could share one, but domain-matched cities and redirects would be contested.
    **For now:** the game requires different domains. This is one setting (`allowSharedDomains` in `src/game/rules.ts`), so changing it is quick.
+3. **Who makes choices on a card?** Several cards leave a choice open without saying who makes it: Heresy ("loses 2 Flock from one city"), Miasma ("one of their cities loses 2"). Barren Years says "(their choice)", which suggests that otherwise the caster chooses.
+   **Proposed, and used for now:** the caster makes every choice on their card unless it says "their choice".
+4. **"Its owner" on a city Calamity.** Pilgrims Turn Away and Desertion say "its owner loses 1 from reserve". City Calamities name a target player, but the city might be controlled by someone else, or no one.
+   **Proposed, and used for now:** "its owner" means the target player, matching the Durations rule ("for an effect on a city, that is the player the effect was cast on").
+5. **Locust Swarm.** "Anything they can't pay comes out of their cities": who picks which cities, the caster or the target? (Not playable until this is settled.)
+6. **Fertile Age.** "Target city gains Flock equal to half its current Flock": half of *your* Flock there, or half of *everyone's*? (Not playable until this is settled.)
+7. **Casting a card with no valid target.** Can you cast a card that would do nothing, for example Second Life with no cheap Favor in the discard pile, or Golden Age while controlling one city, just to get it out of your hand?
+   **For now:** a card needs a valid choice for each question to be cast. A Calamity at a player with no Flock in the chosen city is still allowed (the rulebook says "that part does nothing").
 
 ## Answered
 

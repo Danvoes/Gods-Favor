@@ -90,6 +90,16 @@ export function waitingFor(state: GameState): PlayerId | null {
 
 export const REGIONS = ["A", "B", "C"] as const;
 
+/** "A city's neighbors are the other cities in its region." */
+export function neighborsOf(data: GameData, cityName: string): string[] {
+  const region = cityInfo(data, cityName).region;
+  return data.cities.filter((c) => c.region === region && c.name !== cityName).map((c) => c.name);
+}
+
+export function citiesInRegion(data: GameData, region: string): string[] {
+  return data.cities.filter((c) => c.region === region).map((c) => c.name);
+}
+
 export function citiesControlledBy(state: GameState, playerId: PlayerId): CityState[] {
   return state.cities.filter((c) => c.controller === playerId);
 }
