@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { cardById } from "./cast";
 import { cardCost } from "./costs";
 import { cityState, placeableCities, playerById } from "./rules";
-import { act, anaToAct, cast, data, flock, passTurn, setFlock, step, tweak } from "./testHelpers";
+import { act, anaToAct, cast, data, flock, passTurn, setFlock, settle, step, tweak } from "./testHelpers";
 import type { GameState } from "./types";
 
 /** Ends Ana's turn, so it's Ben's turn (his Start has run). */
@@ -173,7 +173,7 @@ describe("seeds", () => {
       playerById(g, "p2").reserve = 3;
     });
     g = act(g, { type: "placeFlock", playerId: "p2", placements: {} });
-    g = act(g, { type: "castCard", playerId: "p2", cardId: "HAR-C-07", targets: { player: "p1", city: "Ashgrove" } });
+    g = settle(act(g, { type: "castCard", playerId: "p2", cardId: "HAR-C-07", targets: { player: "p1", city: "Ashgrove" } }));
     expect(cityState(g, "Ashgrove").seeds).toEqual([]);
     expect(flock(g, "Ashgrove")).toEqual({ p1: 10 }); // no Flock lost
     expect(g.ongoing).toEqual([]); // and no lasting frost

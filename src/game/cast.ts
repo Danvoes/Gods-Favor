@@ -8,8 +8,9 @@
 
 import type { DivineCard, GameData } from "../data/types";
 import { cardCost, payCost, totalFlock } from "./costs";
-import { effectFor, isPlayable, specsFor, type EffectContext, type Option, type Playable, type Targets } from "./effects";
-import { RuleError, cityState, playerById } from "./rules";
+import { effectFor, isPlayable, resolveEffect, specsFor, type EffectContext, type Option, type Playable, type Targets } from "./effects";
+import { openResponses } from "./respond";
+import { RuleError, playerById } from "./rules";
 import { checkTurn } from "./turn";
 import type { GameState, PlayerId, PlayerState } from "./types";
 
@@ -38,7 +39,8 @@ export function canCast(data: GameData, state: GameState, playerId: PlayerId, ca
   const card = cardById(data, cardId);
   const effect = effectFor(cardId);
   if (!isPlayable(effect)) {
-    return { ok: false, reason: `Coming in ${effect.later === "4b" ? "milestone 4b" : effect.later}: this card ${effect.why}.` };
+    if (effect.later === "a rules ruling") return { ok: false, reason: `Waiting for a rules ruling: this card ${effect.why}.` };
+    return { ok: false, reason: `Coming in ${effect.later}: this card ${effect.why}.` };
   }
   if (effect.counter) return { ok: false, reason: "A counter: play it when a Calamity is cast at you." };
   const cost = cardCost(data, state, playerId, card).total;
@@ -46,7 +48,7 @@ export function canCast(data: GameData, state: GameState, playerId: PlayerId, ca
     return { ok: false, reason: `Costs ${cost}, but you only have ${totalFlock(state, playerId)} Flock in all.` };
   }
   const ctx = makeContext(data, state, playerById(state, playerId), card, []);
-  const blocked = firstDeadEnd(effect, ctx, {});
+  const blocked = deadEnd(effect, ctx, {});
   if (blocked !== null) return { ok: false, reason: blocked };
   return { ok: true };
 }
@@ -56,14 +58,14 @@ export function canCast(data: GameData, state: GameState, playerId: PlayerId, ca
  * set of answers exists, or the reason the card can't be finished (e.g.
  * Tailwind with no opponent next to any of your cities).
  */
-function firstDeadEnd(effect: Playable, ctx: EffectContext, chosen: Targets): string | null {
+export function deadEnd(effect: Playable, ctx: EffectContext, chosen: Targets): string | null {
   const walk = walkQuestions(effect, ctx, chosen);
   if (walk.complete) return null;
   const q = walk.questions[walk.questions.length - 1];
   if (q.options.length === 0) return q.noneReason;
   let reason = q.noneReason;
   for (const o of q.options) {
-    const result = firstDeadEnd(effect, ctx, { ...walk.answers, [q.key]: o.value });
+    const result = deadEnd(effect, ctx, { ...walk.answers, [q.key]: o.value });
     if (result === null) return null;
     reason = result;
   }
@@ -113,7 +115,21 @@ export function castingQuestions(
   const effect = effectFor(cardId);
   if (!isPlayable(effect)) return [];
   const ctx = makeContext(data, state, playerById(state, playerId), cardById(data, cardId), []);
-  return walkQuestions(effect, ctx, chosen).questions;
+  return withoutDeadEnds(effect, ctx, walkQuestions(effect, ctx, chosen));
+}
+
+/**
+ * Drops choices that can't lead to a finished cast (e.g. Strong Winds aimed at
+ * a player with no Flock on the board), so players are only offered choices
+ * that work. A question left with no choices keeps its explanation.
+ */
+export function withoutDeadEnds(effect: Playable, ctx: EffectContext, walk: ReturnType<typeof walkQuestions>): Question[] {
+  const before: Targets = {};
+  return walk.questions.map((q) => {
+    const options = q.options.filter((o) => deadEnd(effect, ctx, { ...before, [q.key]: o.value }) === null);
+    if (walk.answers[q.key] !== undefined) before[q.key] = walk.answers[q.key];
+    return { ...q, options };
+  });
 }
 
 /** Checks a full set of answers, throwing a RuleError naming the first problem. */
@@ -154,31 +170,17 @@ export function castCard(
   const paid = payCost(state, caster, cost, payFrom);
   caster.nextCardCost = 0;
 
-  // 4. Resolve, then discard.
+  // 4. A Calamity aimed at a player waits for responses (redirect, counter)
+  //    before it resolves. Anything else resolves now, then is discarded.
   caster.hand.splice(caster.hand.indexOf(cardId), 1);
   const aimedAt = answers.player && answers.player !== caster.id ? ` at ${playerById(state, answers.player).name}` : "";
   state.log.push(`${caster.name} casts ${card.name}${aimedAt} (${card.deck}, cost ${cost}${paid}).`);
+  if (card.deck === "Calamity" && answers.player) {
+    openResponses(data, state, cardId, caster.id, answers);
+    return;
+  }
   resolveEffect(ctx, effect, answers);
   for (const line of lines) state.log.push(`  ${line}`);
   state.discards[card.deck].push(cardId);
-
   phase.step = "end";
-}
-
-/**
- * Runs a card's effect. One rule comes first: "a Harvest Calamity on that
- * city destroys the seed instead of its usual effect."
- */
-export function resolveEffect(ctx: EffectContext, effect: Playable, answers: Targets) {
-  const { card, state } = ctx;
-  if (card.deck === "Calamity" && card.domain === "Harvest" && answers.city && answers.player) {
-    const city = cityState(state, answers.city);
-    const seed = city.seeds.find((sd) => sd.owner === answers.player);
-    if (seed) {
-      city.seeds.splice(city.seeds.indexOf(seed), 1);
-      ctx.report(`It destroys ${playerById(state, answers.player).name}'s seed in ${answers.city} instead of its usual effect.`);
-      return;
-    }
-  }
-  effect.resolve(ctx, answers);
 }

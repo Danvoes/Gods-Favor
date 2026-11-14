@@ -482,6 +482,10 @@ body {
   border-left: 3px solid var(--health);
   background: var(--bg);
 }
+.response-panel { border-top: 6px solid var(--domain); }
+.response-panel h2 { color: var(--domain); }
+.response-summary { margin: 0; font-size: 1.05rem; }
+.hand-card .grid.hand { margin: 0; }
 
 /* Domain colours last, so they override any default colour above. */
 .d-nature { --domain: var(--nature); }

@@ -40,6 +40,7 @@ export function beginTurn(data: GameData, state: GameState, playerId: PlayerId, 
     step: "draw",
     logStart: state.log.length - 1,
     calamityHits: [],
+    handoffs: 0,
   };
 
   activateFor(state, playerId);
@@ -188,7 +189,13 @@ export function checkTurn(state: GameState, playerId: PlayerId, ...steps: TurnSt
     throw new RuleError(`It's ${playerById(state, phase.player).name}'s turn, not ${playerById(state, playerId).name}'s.`);
   }
   if (!steps.includes(phase.step)) {
-    const what = { draw: "drawing cards", economy: "placing Flock", action: "taking an action", end: "ending the turn" };
+    const what = {
+      draw: "drawing cards",
+      economy: "placing Flock",
+      action: "taking an action",
+      end: "ending the turn",
+      respond: "waiting for a response to a Calamity",
+    };
     throw new RuleError(`${playerById(state, playerId).name} can't do that while ${what[phase.step]}.`);
   }
   return phase;

@@ -38,6 +38,15 @@ Found while reading `docs/RULES.md` and the CSVs for the digital build. A comput
 21. **Rationing.** **Used:** cancels any lasting effect on you or on a city you control. Ruin tokens and "next card" cost changes aren't ongoing effects.
 22. **The Great Plague.** "Hits another city they control for 2" at the start of the target's next turn: who picks the city, the caster or the target? (Not playable until this is settled.)
 
+### Redirects and counters (milestone 4b). Proposed, and used for now
+
+23. **Redirect cost.** "Pay its cost" **used as:** the card's printed cost, not changed by Workshops, City Walls or next-card effects. Only the target player changes; the city and every other choice stay.
+24. **Who can be the new target?** **Used:** anyone except the current target, including the caster or the redirector. The caster can't redirect their own Calamity.
+25. **Who can counter?** **Used:** only the target. Cure works on any Calamity aimed at you. Shelter of the Wild needs a Calamity aimed at a city where you have Flock or control, so it can't stop region-wide (Great Flood) or player-only (Famine) Calamities.
+26. **Counter costs** follow normal card costs (Workshops, next-card effects). The caster's paid cost isn't refunded when a Calamity is countered or redirected.
+27. **Contagion and Remembered Prayers.** **Used:** the card played from the discard pile resolves as part of Contagion or Remembered Prayers (no separate redirect or counter) and stays in the discard pile. They can't play counters, each other, or Barren Years.
+28. **Barren Years** with fewer than 2 cards in hand: the target discards what they have.
+
 ## Answered
 
 ### Designer rulings (not yet in RULES.md)

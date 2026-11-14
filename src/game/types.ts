@@ -126,6 +126,10 @@ export type Phase =
       logStart: number;
       /** Cities a Calamity has hit this turn (Herbal Remedy checks this). */
       calamityHits: string[];
+      /** A Calamity waiting for other players to respond, if any. */
+      pending?: PendingCalamity;
+      /** Counts every time the device must pass to someone else mid-turn, so each pass gets its own "pass the device" screen. */
+      handoffs: number;
     }
   | { name: "gameOver"; winner: PlayerId };
 
@@ -136,8 +140,30 @@ export type Phase =
  *   economy - place income and reserve Flock on the board, or keep it
  *   action  - do one action (cast a card, or skip)
  *   end     - the action is done; the player reviews what happened, then ends the turn
+ *   respond - waiting for another player to respond to a Calamity
  */
-export type TurnStep = "draw" | "economy" | "action" | "end";
+export type TurnStep = "draw" | "economy" | "action" | "end" | "respond";
+
+/**
+ * A Calamity that has been cast and paid for, waiting on responses:
+ *   redirect - the player whose domain matches may pay its cost to pick a new target
+ *   counter  - the target may play Cure or Shelter of the Wild (always asked)
+ *   choose   - the target makes a choice the card gives them (Barren Years' discards)
+ */
+export interface PendingCalamity {
+  cardId: string;
+  caster: PlayerId;
+  answers: Record<string, string>;
+  stage: "redirect" | "counter" | "choose";
+  responder: PlayerId;
+  redirected: boolean;
+}
+
+export type Response =
+  | { kind: "decline" }
+  | { kind: "redirect"; newTarget: PlayerId; payFrom?: Record<string, number> }
+  | { kind: "counter"; cardId: string; targets: Record<string, string>; payFrom?: Record<string, number> }
+  | { kind: "choose"; cardIds: string[] };
 
 export interface GameState {
   /** The seed this game started from, kept so the game can be replayed. */
@@ -187,4 +213,6 @@ export type Action =
       cardId: string;
       targets: Record<string, string>;
       payFrom?: Record<string, number>;
-    };
+    }
+  /** A response to a Calamity by the player the game is waiting on. */
+  | { type: "respond"; playerId: PlayerId; response: Response };

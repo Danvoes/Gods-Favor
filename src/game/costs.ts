@@ -87,5 +87,6 @@ export function payCost(state: GameState, payer: PlayerState, cost: number, payF
     else delete c.flock[payer.id];
   }
   if (shortfall === 0) return "";
-  return `, paid ${fromReserve} from reserve and ${entries.map(([c, n]) => `${n} from ${c}`).join(", ")}`;
+  const fromPlaces = entries.map(([c, n]) => `${n} from ${c}`).join(", ");
+  return fromReserve > 0 ? `, paid ${fromReserve} from reserve and ${fromPlaces}` : `, paid ${fromPlaces}`;
 }

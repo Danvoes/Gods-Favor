@@ -55,6 +55,8 @@ export interface Playable {
   resolve: (ctx: EffectContext, t: Targets) => void;
   /** Counters are only played in response to a Calamity, not as an action. */
   counter?: boolean;
+  /** The target player makes a choice when it resolves (Barren Years: discard 2 of their choice). */
+  targetChooses?: { key: string; count: number; question: string };
 }
 
 export function specsFor(effect: Playable, ctx: EffectContext, chosen: Targets): TargetSpec[] {
@@ -62,7 +64,7 @@ export function specsFor(effect: Playable, ctx: EffectContext, chosen: Targets):
 }
 
 export interface NotYet {
-  later: "4b" | "milestone 5";
+  later: "milestone 5" | "a rules ruling";
   why: string;
 }
 
@@ -338,7 +340,64 @@ function cityGainAndReserve(text: string, city: number, reserve: number): Playab
   };
 }
 
-const later4b = (why: string): NotYet => ({ later: "4b", why });
+const ruling = (why: string): NotYet => ({ later: "a rules ruling", why });
+
+/** The Calamity waiting on responses, if any (counters use it). */
+function pendingCalamity(ctx: EffectContext) {
+  const phase = ctx.state.phase;
+  return phase.name === "turn" ? phase.pending : undefined;
+}
+
+/** Contagion and Remembered Prayers: play a card from the discard pile for free, asking its own questions. */
+function playFromDiscard(
+  text: string,
+  deck: "Calamity" | "Favor",
+  maxCost: number,
+): Playable {
+  const pick: TargetSpec = {
+    key: "inner",
+    question: `Which ${deck} from the discard pile?`,
+    noneReason: `There's no playable ${deck} costing ${maxCost} or less in the discard pile.`,
+    options: (ctx) =>
+      [...new Set(ctx.state.discards[deck])]
+        .map((id) => ctx.data.cards.find((c) => c.id === id) as DivineCard)
+        .filter((c) => {
+          const e = EFFECTS[c.id];
+          return c.cost <= maxCost && e && isPlayable(e) && !e.counter && typeof e.targets !== "function" && !e.targetChooses;
+        })
+        .map((c) => ({ value: c.id, label: `${c.name} (cost ${c.cost}): ${c.effect}` })),
+  };
+  const innerCtx = (ctx: EffectContext, id: string): EffectContext => ({
+    ...ctx,
+    card: ctx.data.cards.find((c) => c.id === id) as DivineCard,
+  });
+  // The inner card's answers are stored with an "in_" prefix, apart from the shared target player.
+  const unprefix = (t: Targets): Targets => {
+    const out: Targets = {};
+    for (const [k, v] of Object.entries(t)) if (k.startsWith("in_")) out[k.slice(3)] = v;
+    if (t.player) out.player = t.player;
+    return out;
+  };
+  return {
+    text,
+    targets: (ctx, chosen) => {
+      const base = deck === "Calamity" ? [targetPlayer, pick] : [pick];
+      if (!chosen.inner) return base;
+      const inner = EFFECTS[chosen.inner] as Playable;
+      const ictx = innerCtx(ctx, chosen.inner);
+      const innerSpecs = (inner.targets as TargetSpec[])
+        .filter((spec) => spec.key !== "player")
+        .map((spec) => ({ ...spec, key: `in_${spec.key}`, options: (_: EffectContext, t: Targets) => spec.options(ictx, unprefix(t)) }));
+      return [...base, ...innerSpecs];
+    },
+    resolve: (ctx, t) => {
+      const inner = EFFECTS[t.inner] as Playable;
+      const ictx = innerCtx(ctx, t.inner);
+      ctx.report(`It plays ${ictx.card.name} from the discard pile for free.`);
+      resolveEffect(ictx, inner, unprefix(t));
+    },
+  };
+}
 const later5 = (why: string): NotYet => ({ later: "milestone 5", why });
 
 // --------------------------------------------------------------- the cards
@@ -396,6 +455,10 @@ export const EFFECTS: Record<string, CardEffect> = {
     ],
     resolve: (ctx, t) => {
       const from = cityState(ctx.state, t.city);
+      if (flockIn(from, t.player) === 0) {
+        ctx.report(`${playerName(ctx, t.player)} has no Flock in ${t.city}, so nothing happens.`);
+        return;
+      }
       setFlock(ctx.state, t.city, t.player, flockIn(from, t.player) - 1);
       setFlock(ctx.state, t.neighbor, t.player, flockIn(cityState(ctx.state, t.neighbor), t.player) + 1);
       ctx.report(`1 of ${playerName(ctx, t.player)}'s Flock is blown from ${t.city} to ${t.neighbor}.`);
@@ -431,7 +494,28 @@ export const EFFECTS: Record<string, CardEffect> = {
       others.forEach((c) => gainFlock(ctx, c, 1));
     },
   },
-  "NAT-F-05": later4b("is a counter, played in response to a Calamity"),
+  "NAT-F-05": {
+    text: "Counter: cancel a Calamity just played on one of your cities, then that city and one neighbor each gain 1.",
+    counter: true,
+    targets: [
+      {
+        key: "neighbor",
+        question: "Which neighbor also gains 1?",
+        noneReason: "Shelter of the Wild only works on a Calamity aimed at one of your cities.",
+        options: (ctx) => {
+          const city = pendingCalamity(ctx)?.answers.city;
+          if (!city) return [];
+          const c = cityState(ctx.state, city);
+          if (c.controller !== ctx.caster.id && flockIn(c, ctx.caster.id) === 0) return [];
+          return neighborsOf(ctx.data, city).map((n) => withFlockLabel(ctx, ctx.caster.id, n));
+        },
+      },
+    ],
+    resolve: (ctx, t) => {
+      gainFlock(ctx, pendingCalamity(ctx)!.answers.city, 1);
+      gainFlock(ctx, t.neighbor, 1);
+    },
+  },
   "NAT-F-06": cityGain("Target gains 2 Flock, and one neighbor gains 1.", 2, 1),
   "NAT-F-07": {
     text: "Move up to 2 of your Flock into a neighboring city, then add 1 more there.",
@@ -510,7 +594,7 @@ export const EFFECTS: Record<string, CardEffect> = {
       lasting(ctx, { kind: "startLoss", player: t.player, city: t.city, amount: 1, turnsLeft: 3 });
     },
   },
-  "HAR-C-03": later4b("needs a ruling on who picks which cities pay (see rules questions)"),
+  "HAR-C-03": ruling("needs a ruling on who picks which cities pay (see rules questions)"),
   "HAR-C-04": {
     text: "Target city produces no income for 2 turns.",
     targets: [targetPlayer, calamityCity],
@@ -616,7 +700,7 @@ export const EFFECTS: Record<string, CardEffect> = {
     targets: [targetPlayer],
     resolve: (ctx, t) => lasting(ctx, { kind: "costUp", player: t.player, amount: 2, turnsLeft: 2 }),
   },
-  "PRO-C-04": later4b("locks a Prophet (Prophets arrive in milestone 5)"),
+  "PRO-C-04": later5("locks a Prophet"),
   "PRO-C-05": {
     text: "Target city loses 3 Flock, and one structure there is destroyed.",
     targets: [targetPlayer, calamityCity, whichStructure],
@@ -635,7 +719,7 @@ export const EFFECTS: Record<string, CardEffect> = {
   },
   "PRO-C-07": nextCardCost("Target player's next card costs 2 more.", "target", 2),
   "PRO-C-08": nextCardCost("Target player's next card costs 1 more.", "target", 1),
-  "PRO-C-09": later4b("locks a Prophet (Prophets arrive in milestone 5)"),
+  "PRO-C-09": later5("locks a Prophet"),
 
   // Production Favors: permanence
   "PRO-F-01": structureCard("PRO-F-01", "Build: this city gives +2 income every turn."),
@@ -707,14 +791,30 @@ export const EFFECTS: Record<string, CardEffect> = {
   "PRO-F-09": later5("moves your Prophet"),
 
   // Health Calamities: the graveyard
-  "HEA-C-01": later4b("rises again next turn (an ongoing effect)"),
-  "HEA-C-02": later4b("lets the target choose their discards"),
+  "HEA-C-01": ruling("needs a ruling on who picks the second city it hits (see rules questions)"),
+  "HEA-C-02": {
+    text: "Target player discards 2 cards from their hand (their choice) and loses 1 Flock in each city they control.",
+    targets: [targetPlayer],
+    targetChooses: { key: "discards", count: 2, question: "Choose 2 cards to discard" },
+    resolve: (ctx, t) => {
+      const p = playerById(ctx.state, t.player);
+      for (const id of (t.discards ?? "").split(",").filter(Boolean)) {
+        p.hand.splice(p.hand.indexOf(id), 1);
+        const card = ctx.data.cards.find((c) => c.id === id)!;
+        ctx.state.discards[card.deck].push(id);
+        ctx.report(`${p.name} discards ${card.name}.`);
+      }
+      const controlled = ctx.state.cities.filter((c) => c.controller === t.player).map((c) => c.name);
+      if (controlled.length === 0) ctx.report(`${p.name} controls no cities, so no Flock is lost.`);
+      controlled.forEach((c) => hit(ctx, c, t.player, 1));
+    },
+  },
   "HEA-C-03": {
     text: "Target city loses 2 Flock, or 4 if another Health Calamity is in the discard pile.",
     targets: [targetPlayer, calamityCity],
     resolve: (ctx, t) => hit(ctx, t.city, t.player, inDiscard(ctx, "Calamity", "Health/Fertility") > 0 ? 4 : 2),
   },
-  "HEA-C-04": later4b("plays a card from the discard pile"),
+  "HEA-C-04": playFromDiscard("Choose a Calamity in the discard pile costing 3 or less and play it for free against the target.", "Calamity", 3),
   "HEA-C-05": {
     text: "Target player discards 1 card at random, and one of their cities loses 2 Flock.",
     targets: [targetPlayer, cityWithTargetFlock],
@@ -749,14 +849,19 @@ export const EFFECTS: Record<string, CardEffect> = {
 
   // Health Favors: the graveyard
   "HEA-F-01": later5("brings back a Prophet or Hero"),
-  "HEA-F-02": later4b("needs a ruling on whose Flock counts (see rules questions)"),
-  "HEA-F-03": later4b("plays a card from the discard pile"),
+  "HEA-F-02": ruling("needs a ruling on whose Flock counts (see rules questions)"),
+  "HEA-F-03": playFromDiscard("Choose a Favor card in the discard pile costing 4 or less and play it for free.", "Favor", 4),
   "HEA-F-04": {
     text: "Target city gains 2 Flock, plus 1 more for each Health Favor in the discard pile (maximum +3).",
     targets: [favorCity],
     resolve: (ctx, t) => gainFlock(ctx, t.city, 2 + Math.min(3, inDiscard(ctx, "Favor", "Health/Fertility"))),
   },
-  "HEA-F-05": later4b("is a counter, played in response to a Calamity"),
+  "HEA-F-05": {
+    text: "Counter: cancel a Calamity just played on you, and put it on the bottom of its deck instead of the discard pile.",
+    counter: true,
+    targets: [],
+    resolve: () => {},
+  },
   "HEA-F-06": later5("removes a strike"),
   "HEA-F-07": {
     text: "Take a Favor card costing 3 or less from the discard pile into your hand.",
@@ -874,6 +979,24 @@ function discardAtRandom(ctx: EffectContext, playerId: string) {
   const card = ctx.data.cards.find((c) => c.id === id)!;
   ctx.state.discards[card.deck].push(id);
   ctx.report(`${p.name} discards ${card.name} at random.`);
+}
+
+/**
+ * Runs a card's effect. One rule comes first: "a Harvest Calamity on that
+ * city destroys the seed instead of its usual effect."
+ */
+export function resolveEffect(ctx: EffectContext, effect: Playable, answers: Targets) {
+  const { card, state } = ctx;
+  if (card.deck === "Calamity" && card.domain === "Harvest" && answers.city && answers.player) {
+    const city = cityState(state, answers.city);
+    const seed = city.seeds.find((sd) => sd.owner === answers.player);
+    if (seed) {
+      city.seeds.splice(city.seeds.indexOf(seed), 1);
+      ctx.report(`It destroys ${playerById(state, answers.player).name}'s seed in ${answers.city} instead of its usual effect.`);
+      return;
+    }
+  }
+  effect.resolve(ctx, answers);
 }
 
 /** Looks up a card's effect. Throws if a card has no entry, which a test guards against. */

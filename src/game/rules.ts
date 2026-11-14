@@ -30,6 +30,8 @@ export const RULES = {
   /** Cost to turn on an Idle or switched-off structure. */
   restoreStructureCost: 2,
   structureIncome: { "Grand Foundry": 2, Market: 1 } as Partial<Record<StructureKind, number>>,
+  /** Extra cost to redirect a Calamity someone is using to punish their own character. */
+  punishmentRedirectExtra: 2,
 };
 
 /** Thrown when someone tries something the rules don't allow. The message is shown to players. */
@@ -91,7 +93,7 @@ export function waitingFor(state: GameState): PlayerId | null {
     return state.players.find((p) => !(p.id in phase.choices))?.id ?? null;
   }
   if (phase.name === "drawStartingHands") return state.turnOrder[phase.drawer] ?? null;
-  if (phase.name === "turn") return phase.player;
+  if (phase.name === "turn") return phase.pending?.responder ?? phase.player;
   return null;
 }
 

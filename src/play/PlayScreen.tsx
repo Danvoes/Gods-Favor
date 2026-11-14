@@ -12,6 +12,7 @@ import type { Action, GameState, NewPlayer, PlayerId } from "../game/types";
 import { NewGameForm } from "./NewGameForm";
 import { PassDevice } from "./PassDevice";
 import { ChooseStartingCity, DrawStartingHand, Reveal, ReviewHand } from "./SetupSteps";
+import { ResponseView } from "./ResponseView";
 import { GameOver, TurnView } from "./TurnView";
 
 export function PlayScreen({ data }: { data: GameData }) {
@@ -80,14 +81,24 @@ export function PlayScreen({ data }: { data: GameData }) {
             onLastCard={setReviewing}
           />
         );
-      case "turn":
-        // A new pass-the-device screen at the start of every turn, because
-        // the turn shows that player's hand.
+      case "turn": {
+        // A new "pass the device" screen whenever the device changes hands:
+        // at the start of each turn, and when someone must respond to a Calamity.
+        const holder = playerById(g, nextId!);
+        const key = `${g.turnCount}-${g.phase.handoffs}`;
+        if (g.phase.pending) {
+          return (
+            <PassDevice key={key} player={holder} purpose="A Calamity needs your response.">
+              <ResponseView data={data} game={g} act={act} />
+            </PassDevice>
+          );
+        }
         return (
-          <PassDevice key={`${g.phase.round}-${g.phase.player}`} player={playerById(g, g.phase.player)} purpose="It's your turn.">
+          <PassDevice key={key} player={holder} purpose={g.phase.handoffs > 0 ? "Your turn continues." : "It's your turn."}>
             <TurnView data={data} game={g} act={act} />
           </PassDevice>
         );
+      }
       case "gameOver":
         return <GameOver data={data} game={g} />;
     }

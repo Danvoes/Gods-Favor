@@ -17,10 +17,10 @@ describe("every card is accounted for", () => {
     expect(isPlayable(effect) && effect.text).toBe(card.effect);
   });
 
-  it("every card that isn't playable yet says which milestone brings it and why", () => {
+  it("every card not playable yet waits for milestone 5 or a rules ruling, and says why", () => {
     for (const effect of Object.values(EFFECTS)) {
       if (!isPlayable(effect)) {
-        expect(["4b", "milestone 5"]).toContain(effect.later);
+        expect(["milestone 5", "a rules ruling"]).toContain(effect.later);
         expect(effect.why.length).toBeGreaterThan(5);
       }
     }
@@ -273,5 +273,13 @@ describe("offering only cards that can be finished", () => {
   it("doesn't offer Tailwind when no opponent is next to any of your cities", () => {
     const g = anaToAct(["NAT-F-09"]);
     expect(canCast(data, g, "p1", "NAT-F-09")).toEqual({ ok: false, reason: "No opponent has Flock in a neighboring city." });
+  });
+});
+
+describe("offering only choices that lead somewhere", () => {
+  it("doesn't offer Strong Winds against a player with no Flock on the board", () => {
+    const g = anaToAct(["NAT-C-09"], 6, (g) => setFlock(g, "Brightwell", {}));
+    const players = castingQuestions(data, g, "p1", "NAT-C-09", {})[0].options.map((o) => o.value);
+    expect(players).toEqual(["p2", "p1"]); // not Cy, who has nothing to move
   });
 });

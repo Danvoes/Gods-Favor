@@ -77,8 +77,23 @@ export function anaToAct(hand: string[], reserve = 6, change: (g: GameState) => 
   return g;
 }
 
+/** Casts a card for Ana, then lets every response go by ("no response"), so the card resolves. */
 export const cast = (g: GameState, cardId: string, targets: Record<string, string> = {}, payFrom?: Record<string, number>) =>
-  act(g, { type: "castCard", playerId: "p1", cardId, targets, payFrom });
+  settle(act(g, { type: "castCard", playerId: "p1", cardId, targets, payFrom }));
+
+/** Declines every waiting response until nobody is being asked. */
+export function settle(g: GameState): GameState {
+  while (g.phase.name === "turn" && g.phase.pending) {
+    const p = g.phase.pending;
+    if (p.stage === "choose") {
+      const hand = playerById(g, p.responder).hand;
+      g = act(g, { type: "respond", playerId: p.responder, response: { kind: "choose", cardIds: hand.slice(0, 2) } });
+    } else {
+      g = act(g, { type: "respond", playerId: p.responder, response: { kind: "decline" } });
+    }
+  }
+  return g;
+}
 
 export const flock = (g: GameState, city: string) => cityState(g, city).flock;
 

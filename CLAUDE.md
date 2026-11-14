@@ -28,6 +28,10 @@ Open rules questions are tracked in `docs/RULES-QUESTIONS.md`. Don't silently pi
 - **Seeded randomness** (`src/game/random.ts`): shuffles and tie-breaks use a generator whose state is stored in the game state, so the same seed replays the same game. Never use `Math.random()` in game logic.
 - **Turns** (`src/game/turn.ts`): phases that need no decision (Start, Prophecy, End) run on their own; the game stops at the steps that wait for the player (`draw`, `economy`, `action`). Each phase is a function named after its rulebook section. Every event is written to `state.log` in plain language, which the screens show.
 - **Card effects** (`src/game/effects.ts`): one entry per Calamity/Favor card, holding a copy of its CSV text, its target questions (each offering only legal choices) and what it does. Cards not built yet say which milestone brings them. `src/game/cast.test.ts` fails if any card lacks an entry or if a card's CSV text no longer matches its entry: then update that card's code. Casting (`src/game/cast.ts`) checks answers, pays reserve first then caster-chosen cities, resolves, discards.
+- **Responses to Calamities** (`src/game/respond.ts`): a Calamity aimed at a player is paid for, then waits (`phase.pending`, step `respond`). First the player whose domain matches may pay to redirect it (if they can afford it), then the target is always asked whether to counter (designer's choice: only players who can respond are asked, except the target, who always is). `phase.handoffs` counts each time the device changes hands; the screen shows a new pass-the-device screen for each.
+- **Lasting effects** (`src/game/ongoing.ts`): markers on a player (and city) that wait for the affected player's next turn, work during their turns and count down at their End.
+- **Costs** (`src/game/costs.ts`): `cardCost` gives the cost line by line; `payCost` takes reserve first, then caster-chosen cities.
+- **Card questions** only offer choices that can lead to a finished cast (dead ends are filtered out), and a card is only offered if some full set of answers exists.
 - **Pass-and-play privacy**: hidden information (secret choices, hands) is shown only behind a `PassDevice` screen. The state holds everything; screens decide what to reveal.
 - **Player colour = domain colour**, which relies on domains being unique (see open question).
 - **Tests with Vitest.** `src/data/data.test.ts` checks the CSVs against the rulebook's component counts; rules logic gets tests as it's written.
@@ -42,8 +46,11 @@ In `cards.csv`, Free Will rows reuse the `domain` column for **Prophet/Hero** an
 data/            cards.csv, characters.csv, cities.csv (designer-owned)
 docs/            RULES.md (designer-owned), RULES-QUESTIONS.md
 src/data/        types, CSV parsing + validation, data tests
-src/game/        rules engine, no React: engine.ts (entry point), setup.ts, turn.ts, cast.ts, effects.ts (every card), rules.ts (helpers + RULES numbers), deck.ts, random.ts, types.ts; tests + testHelpers.ts
-src/play/        Play tab screens: new game, pass-the-device, setup steps, turn view, action/cast panel, board
+src/game/        rules engine, no React: engine.ts (entry point), setup.ts, turn.ts, cast.ts, effects.ts (every card),
+                 respond.ts (redirects, counters), ongoing.ts (lasting effects), costs.ts, structures.ts,
+                 rules.ts (helpers + RULES numbers), deck.ts, random.ts, types.ts; tests + testHelpers.ts
+src/play/        Play tab screens: new game, pass-the-device, setup steps, turn view, action/cast panel,
+                 response view, payment picker, board
 src/components/  shared display pieces (card and character faces)
 src/browser/     card browser tab: filter logic + component
 src/App.tsx      top-level screen with the Play / Card browser tabs
@@ -64,7 +71,7 @@ Run `npm test` and `npm run build` before committing.
 2. ✅ Game setup and board: choose players and domains, secret starting cities, turn order, starting hands, board view.
 3. ✅ Turn loop and economy: six phases, drawing, income, placing Flock, losing and converting cities, Holy Site desecration, holding regions and victory. Placeholders: Prophecy (milestone 5) and the Action choices (only "End turn" so far).
 4a. ✅ Casting: pick a card, answer its questions, pay (reserve then cities), resolve, discard. 49 of 100 Calamity/Favor cards playable (Flock gains/losses, spread, reserve, random discards, discard-pile counts).
-4b. Counters and redirects, cost changes, seeds, ongoing effects, structures, Ruin, and the remaining non-character cards.
+4b. ✅ Structures, Ruin and cost changes; ongoing effects and seeds; redirects, counters, Contagion, Remembered Prayers, Barren Years. 85 of 100 cards playable: 12 wait for milestone 5 (Prophets/Heroes), 3 wait for rulings (Locust Swarm, Fertile Age, The Great Plague).
 5. Prophets, Heroes, Free Will and strikes.
 6. Combat.
 7. Holy Sites, polish, save/resume.
