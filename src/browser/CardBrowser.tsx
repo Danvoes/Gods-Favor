@@ -10,7 +10,7 @@ import {
   optionCounts,
   type Filters,
 } from "./filter";
-import { CardFace, CharacterFace } from "./Faces";
+import { CardFace, CharacterFace } from "../components/Faces";
 
 /** Shorter labels so the filter buttons fit on a phone screen. */
 const SHORT_LABELS: Record<string, string> = {

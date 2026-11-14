@@ -8,6 +8,8 @@ Found while reading `docs/RULES.md` and the CSVs for the digital build. A comput
    **Proposed:** yes. They count as Idle, but without the free one-Economy-Phase wait.
 2. **An exiled Hero.** While a Hero is in exile off the board, is it a "character you no longer have" (its Free Will cards are discarded with no effect, and Scandal can't target it)? Or does it still draw Free Will cards and take strikes, with no city to lose Flock from?
    **Proposed:** treat it as missing until it returns.
+3. **Can two players pick the same domain?** Setup says each player "picks a god and its domain" but not whether domains must be different. Each domain has 2 Prophets and 2 Heroes, so two players could share one, but domain-matched cities and redirects would be contested.
+   **For now:** the game requires different domains. This is one setting (`allowSharedDomains` in `src/game/rules.ts`), so changing it is quick.
 
 ## Answered
 

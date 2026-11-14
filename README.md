@@ -28,4 +28,5 @@ npm test
 
 ## Status
 
-Milestone 1: a card browser showing every card, Prophet and Hero, filterable by deck, domain and tier.
+- Milestone 1: a card browser showing every card, Prophet and Hero, filterable by deck, domain and tier.
+- Milestone 2: game setup for 2–4 players on one device (names and domains, secret starting cities, turn order, starting hands) and the board.

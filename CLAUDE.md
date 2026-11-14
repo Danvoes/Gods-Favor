@@ -24,6 +24,10 @@ Open rules questions are tracked in `docs/RULES-QUESTIONS.md`. Don't silently pi
 - **CSV files are bundled at build time** with Vite's `?raw` import (`src/data/index.ts`). The CSVs in `data/` stay the single source of truth: edit them, not copies in code.
 - **Every row is validated on load** (`src/data/parse.ts`). A bad value shows an error naming the file, row and column instead of a broken card.
 - **Rules engine separate from the screen** (from milestone 2 on): game logic in plain TypeScript functions with no React, taking a game state and an action and returning a new state. The UI only displays state and sends actions. This keeps the rules testable and leaves room for online play or AI opponents later.
+- **The engine** (`src/game/setup.ts`): `createGame(data, players, seed)` makes a new game; `applyAction(data, state, action)` returns a *new* state (it copies, never edits the old one) or throws a `RuleError` with a message for players. Rule numbers live in `RULES` in `src/game/rules.ts`.
+- **Seeded randomness** (`src/game/random.ts`): shuffles and tie-breaks use a generator whose state is stored in the game state, so the same seed replays the same game. Never use `Math.random()` in game logic.
+- **Pass-and-play privacy**: hidden information (secret choices, hands) is shown only behind a `PassDevice` screen. The state holds everything; screens decide what to reveal.
+- **Player colour = domain colour**, which relies on domains being unique (see open question).
 - **Tests with Vitest.** `src/data/data.test.ts` checks the CSVs against the rulebook's component counts; rules logic gets tests as it's written.
 
 ## Data quirk
@@ -36,8 +40,11 @@ In `cards.csv`, Free Will rows reuse the `domain` column for **Prophet/Hero** an
 data/            cards.csv, characters.csv, cities.csv (designer-owned)
 docs/            RULES.md (designer-owned), RULES-QUESTIONS.md
 src/data/        types, CSV parsing + validation, data tests
-src/browser/     card browser (milestone 1): filter logic + components
-src/App.tsx      top-level screen
+src/game/        rules engine: no React. types, setup + actions, rule helpers, seeded random, tests
+src/play/        Play tab screens: new game, pass-the-device, setup steps, board
+src/components/  shared display pieces (card and character faces)
+src/browser/     card browser tab: filter logic + component
+src/App.tsx      top-level screen with the Play / Card browser tabs
 ```
 
 ## Commands
@@ -52,7 +59,7 @@ Run `npm test` and `npm run build` before committing.
 ## Milestones
 
 1. ✅ Load all cards, characters and cities from CSV; card browser filterable by deck, domain and tier.
-2. Game setup and board: choose players and domains, place starting Flock, show cities and regions.
+2. ✅ Game setup and board: choose players and domains, secret starting cities, turn order, starting hands, board view.
 3. Turn loop and economy: phases, drawing, income, reserve, conversion and victory.
 4. Casting cards: costs, targeting, held vs. must-play cards, counters, seeds, ongoing effects, structures.
 5. Prophets, Heroes, Free Will and strikes.
